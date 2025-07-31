@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flower Bouquet Affirmations with Photos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f0ff,rgb(54, 62, 63));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        header {
+            margin-bottom: 40px;
+            animation: fadeIn 1.5s ease-out;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            color: #e83e8c;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.6rem;
+            color: #6a5acd;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+        
+        .bouquet-container {
+            position: relative;
+            height: 500px;
+            margin: 0 auto 50px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .flower-unit {
+            position: absolute;
+            bottom: 0;
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+        
+        .stem {
+            position: relative;
+            height: 320px;
+            width: 10px;
+            background: linear-gradient(to bottom, #2e8b57, #1a5d38);
+            border-radius: 5px;
+            z-index: 1;
+        }
+        
+        .leaf {
+            position: absolute;
+            font-size: 3rem;
+            color: #2e8b57;
+            z-index: 0;
+            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
+        }
+        
+        .flower {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            z-index: 10;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        .flower:hover {
+            transform: translateY(-10px) scale(1.1);
+            filter: brightness(1.1) drop-shadow(0 6px 8px rgba(0,0,0,0.2));
+        }
+        
+        .pink-flower {
+            color: #ffb6c1;
+        }
+        
+        .white-flower {
+            color: #fff;
+        }
+        
+        .flower i {
+            font-size: 5.5rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .flower-center {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+        
+        .pink-center {
+            background: radial-gradient(#ffd700, #daa520);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+        
+        .white-center {
+            background: radial-gradient(#ffd700, #daa520);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            font-size: 1.3rem;
+            color: #555;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 18px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            max-width: 600px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff, #f9f0ff);
+            border-radius: 25px;
+            padding: 50px;
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            animation: slideUp 0.5s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+        
+        .affirmation {
+            font-size: 2.1rem;
+            color: #6a5acd;
+            margin: 25px 0;
+            font-weight: 600;
+            line-height: 1.5;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            padding: 0 20px;
+        }
+        
+        /* Enlarged photo container */
+        .photo-container {
+            width: 100%;
+            height: 500px;
+            margin: 30px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 8px solid #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .affirmation-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        
+        .placeholder-text {
+            font-size: 1.4rem;
+            color: #888;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            font-size: 2.5rem;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-btn:hover {
+            color: #e83e8c;
+            background: rgba(232, 62, 140, 0.1);
+            transform: rotate(90deg);
+        }
+        
+        .heart-animation {
+            font-size: 3rem;
+            color: #e83e8c;
+            animation: pulse 1.5s infinite;
+            margin-top: 15px;
+        }
+        
+        footer {
+            margin-top: 50px;
+            color: #6a5acd;
+            font-size: 1.3rem;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @media (max-width: 900px) {
+            h1 { font-size: 3rem; }
+            .subtitle { font-size: 1.3rem; }
+            .modal-content { max-width: 90%; padding: 40px 30px; }
+            .affirmation { font-size: 1.8rem; }
+            .photo-container { height: 300px; }
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1.1rem; }
+            .bouquet-container { height: 400px; }
+            .flower-unit { height: 320px; }
+            .stem { height: 260px; }
+            .flower i { font-size: 4rem; }
+            .flower-center { width: 30px; height: 30px; }
+            .affirmation { font-size: 1.6rem; }
+            .photo-container { height: 250px; }
+            .instructions { font-size: 1.1rem; padding: 15px 25px; }
+        }
+        
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            .subtitle { font-size: 1rem; }
+            .affirmation { font-size: 1.4rem; }
+            .photo-container { height: 200px; }
+            .close-btn { top: 15px; right: 15px; font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Alina's Bouquet</h1>
+            <p class="subtitle">Happy National Girlfriend Day My Love
+        </header>
+        <div class="two-image-row">
+            <div class="image-pair">
+                <img src="labubu.png" alt="Image 1">
+            </div>
+            <div class="image-pair">
+                <img src="matcha.png" alt="Image 2">
+            </div>
+            </div>
+
+
+
+        <div class="bouquet-container">
+            <!-- Leftmost Flower Unit (Pink) -->
+            <div class="flower-unit" style="left: 10%;">
+                <div class="flower pink-flower" 
+                     data-affirmation="I love the way you roll your eyes at me"
+                     data-photo="Photo1.JPG">
+                    <i class="fas fa-spa"></i>
+                    <div class="flower-center pink-center"></div>
+                </div>
+                <div class="stem">
+                    <div class="leaf" style="left: -35px; top: 60%; transform: rotate(-30deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="leaf" style="right: -35px; top: 40%; transform: rotate(30deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Second Flower Unit (Pink) -->
+            <div class="flower-unit" style="left: 25%;">
+                <div class="flower pink-flower" 
+                     data-affirmation="I love your sense of humour and creativity"
+                     data-photo="Photo2.JPG">
+                    <i class="fas fa-spa"></i>
+                    <div class="flower-center pink-center"></div>
+                </div>
+                <div class="stem">
+                    <div class="leaf" style="left: -30px; top: 50%; transform: rotate(-40deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="leaf" style="right: -40px; top: 70%; transform: rotate(45deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Center Flower Unit (White) -->
+            <div class="flower-unit" style="left: 50%; transform: translateX(-50%);">
+                <div class="flower white-flower" 
+                     data-affirmation="Your girlfriend effect on me is amazing"
+                     data-photo="Photo3.JPG">
+                    <i class="fas fa-spa"></i>
+                    <div class="flower-center white-center"></div>
+                </div>
+                <div class="stem">
+                    <div class="leaf" style="left: -40px; top: 30%; transform: rotate(-50deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="leaf" style="right: -40px; top: 60%; transform: rotate(50deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fourth Flower Unit (White) -->
+            <div class="flower-unit" style="left: 70%;">
+                <div class="flower white-flower" 
+                     data-affirmation="You are a strong independent woman, the trailblazer of fashion and feminism"
+                     data-photo="Photo4.JPG">
+                    <i class="fas fa-spa"></i>
+                    <div class="flower-center white-center"></div>
+                </div>
+                <div class="stem">
+                    <div class="leaf" style="left: -35px; top: 70%; transform: rotate(-45deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="leaf" style="right: -30px; top: 50%; transform: rotate(40deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rightmost Flower Unit (White) -->
+            <div class="flower-unit" style="left: 85%;">
+                <div class="flower white-flower" 
+                     data-affirmation="My girlfriend is really cool"
+                     data-photo="Photo5.JPG">
+                    <i class="fas fa-spa"></i>
+                    <div class="flower-center white-center"></div>
+                </div>
+                <div class="stem">
+                    <div class="leaf" style="left: -40px; top: 40%; transform: rotate(-35deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="leaf" style="right: -35px; top: 60%; transform: rotate(35deg);">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <i class="fas fa-mouse-pointer"></i> Click on any flower to reveal something cool
+        </div>
+        
+        <footer>
+            Made with <i class="fas fa-heart" style="color: #e83e8c;"></i> for ALINA 
+        </footer>
+    </div>
+    
+    <!-- Affirmation Modal -->
+    <div class="modal" id="affirmationModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <div class="affirmation" id="affirmationText">
+                <!-- Affirmation will appear here -->
+            </div>
+            
+            <!-- Enlarged Photo Container -->
+            <div class="photo-container">
+                <img id="affirmationPhoto" class="affirmation-photo" src="" alt="Special Photo">
+                <div class="placeholder-text">Your special photo will appear here</div>
+            </div>
+            
+            <div>
+                <i class="fas fa-heart heart-animation"></i>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const flowers = document.querySelectorAll('.flower');
+            const modal = document.getElementById('affirmationModal');
+            const affirmationText = document.getElementById('affirmationText');
+            const affirmationPhoto = document.getElementById('affirmationPhoto');
+            const closeBtn = document.getElementById('closeModal');
+            const placeholderText = document.querySelector('.placeholder-text');
+            
+            // Add click event to each flower
+            flowers.forEach(flower => {
+                flower.addEventListener('click', function() {
+                    // Get affirmation text from data attribute
+                    const affirmation = this.getAttribute('data-affirmation');
+                    affirmationText.textContent = affirmation;
+                    
+                    // Get photo URL from data attribute
+                    const photoUrl = this.getAttribute('data-photo');
+                    
+                    // Set the photo source and display it
+                    if (photoUrl) {
+                        affirmationPhoto.src = photoUrl;
+                        affirmationPhoto.style.display = 'block';
+                        placeholderText.style.display = 'none';
+                    } else {
+                        affirmationPhoto.style.display = 'none';
+                        placeholderText.style.display = 'block';
+                    }
+                    
+                    // Show the modal
+                    modal.style.display = 'flex';
+                });
+            });
+            
+            // Close modal when close button is clicked
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside the modal content
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Add floating animation delays
+            flowers.forEach((flower, index) => {
+                flower.style.animationDelay = `${index * 0.3}s`;
+            });
+        });
+    </script>
+</body>
+</html>
