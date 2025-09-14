@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Farmhouse Pets</title>
+  <style>
+    body {
+      font-family: "Comic Sans MS", "Segoe UI", cursive;
+      background: #fff0f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: #ff69b4;
+      text-shadow: 1px 1px #ffc0cb;
+      margin-bottom: 30px;
+    }
+
+    .pet-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .pet-card {
+      background: #ffffff;
+      border: 3px solid #ffb6c1;
+      border-radius: 20px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 4px 4px 10px rgba(255, 182, 193, 0.4);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+
+    .pet-card:hover {
+      transform: scale(1.05);
+      box-shadow: 6px 6px 15px rgba(255, 105, 180, 0.5);
+    }
+
+    /* ENLARGED IMAGE BOUNDARY */
+    .pet-image {
+      width: 100%;
+      height: 250px; /* bigger height */
+      border-radius: 15px;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
+    .pet-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ff1493;
+      margin-bottom: 5px;
+    }
+
+    .pet-origin {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .pet-description {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    /* Popup modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      width: 360px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .modal-content img {
+      width: 100%;
+      height: 250px; /* enlarged modal image */
+      border-radius: 15px;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
+
+    .modal-name {
+      font-size: 1.5rem;
+      color: #ff1493;
+      margin-bottom: 5px;
+    }
+
+    .modal-origin {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .modal-description {
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #ff69b4;
+    }
+
+    @media (max-width: 900px) {
+      .pet-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .pet-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🐾 Our Farmhouse Friends 🐾</h1>
+
+  <div class="pet-grid">
+    <!-- Pet 1 -->
+    <div class="pet-card" data-src="golden.HEIC" data-name="Buddy" data-origin="Barn" data-description="A loyal guardian angel who watches over Brian's sleep">
+      <img class="pet-image" src="golden.HEIC" alt="Buddy">
+      <div class="pet-name">Mr Gold</div>
+      <div class="pet-origin">Toronto</div>
+      <div class="pet-description">Loyal guardian angel who watches over Brian's sleep</div>
+    </div>
+
+    <!-- Pet 2 -->
+    <div class="pet-card" data-src="kiki.JPG" data-name="KiKi" data-origin="Claw Machine" data-description="She was trapped in a claw machine and saved by Alina's clawing skills and sharp placement.">
+      <img class="pet-image" src="kiki.JPG" alt="KiKi">
+      <div class="pet-name">KiKi</div>
+      <div class="pet-origin">Claw Machine</div>
+      <div class="pet-description">She was trapped in a claw machine and saved by Alina's clawing skills and sharp placement.</div>
+    </div>
+
+    <!-- Pet 3 -->
+    <div class="pet-card" data-src="Nora.JPG" data-name="Nora" data-origin="Blind Box" data-description="Watchful guardian making sure Alina locks in at home">
+      <img class="pet-image" src="Nora.JPG" alt="Clover">
+      <div class="pet-name">Nora</div>
+      <div class="pet-origin">Blind Box</div>
+      <div class="pet-description">Watchful studying partner who makes sure Alina locks in at home</div>
+    </div>
+
+    <!-- Pet 4 -->
+    <div class="pet-card" data-src="Wooliam.JPG" data-name="Wooliam" data-origin="Toronto" data-description="Chonky sheep imbued with Armani Code cologne, 10/10 cuddler">
+      <img class="pet-image" src="Wooliam.JPG" alt="Star">
+      <div class="pet-name">Wooliam</div>
+      <div class="pet-origin">Toronto</div>
+      <div class="pet-description">Chonky sheep imbued with Armani Code cologne, 10/10 cuddler</div>
+    </div>
+
+    <!-- Pet 5 -->
+    <div class="pet-card" data-src="whitedog.HEIC" data-name="LeBlanc" data-origin="Hong Kong Blind Box" data-description="Using all his might (and paw) to stabilize the monitor for Brian">
+      <img class="pet-image" src="whitedog.HEIC" alt="LeBlanc">
+      <div class="pet-name">LeBlanc</div>
+      <div class="pet-origin">Hong Kong Blind Box</div>
+      <div class="pet-description">Using all his might (and paw) to stabilize the monitor for Brian</div>
+    </div>
+
+
+  <!-- Modal -->
+  <div id="petModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <img id="modalImage" src="" alt="">
+      <div class="modal-name"></div>
+      <div class="modal-origin"></div>
+      <div class="modal-description"></div>
+    </div>
+  </div>
+
+  <script>
+    const petCards = document.querySelectorAll(".pet-card");
+    const modal = document.getElementById("petModal");
+    const modalImage = document.getElementById("modalImage");
+    const modalName = modal.querySelector(".modal-name");
+    const modalOrigin = modal.querySelector(".modal-origin");
+    const modalDescription = modal.querySelector(".modal-description");
+    const closeBtn = modal.querySelector(".close-btn");
+
+    petCards.forEach(card => {
+      card.addEventListener("click", () => {
+        modalImage.src = card.dataset.src;
+        modalImage.alt = card.dataset.name;
+        modalName.textContent = card.dataset.name;
+        modalOrigin.textContent = "From: " + card.dataset.origin;
+        modalDescription.textContent = card.dataset.description;
+        modal.style.display = "flex";
+      });
+    });
+
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
