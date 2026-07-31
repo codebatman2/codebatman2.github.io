@@ -2051,18 +2051,23 @@ class Component extends DCLogic {
       cB.setHex(sps[1].orbColor);
       cA.lerp(cB, sw[1]);
       orb.material.color.copy(cA);
-      orb.material.opacity = Math.min(1, sunW * 1.15);
-      orb.visible = sunW > 0.03;
+      // Sun and moon are mutually exclusive: the sun fades out entirely
+      // before night's halfway point, the moon only appears after it, so
+      // they never share the sky. Both are gone right at the crossover.
+      const sunOp = Math.max(0, Math.min(1, (0.5 - wNight) / 0.15));
+      const moonOp = Math.max(0, Math.min(1, (wNight - 0.5) / 0.15));
+      orb.material.opacity = sunOp;
+      orb.visible = sunOp > 0.02;
       const hch = [0, 1, 2].map(k => [0, 1, 2, 3].map(j => sps[0].halo[k][j] * sw[0] + sps[1].halo[k][j] * sw[1]));
       paintHalo.apply(null, hch.map(c => 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + c[3].toFixed(2) + ')'));
       halo.position.fromArray(op);
       const hs = snum('haloScale');
       halo.scale.set(hs, hs, 1);
-      halo.material.opacity = Math.min(1, sunW * 1.15);
+      halo.material.opacity = sunOp;
       halo.visible = orb.visible;
-      moon.material.opacity = wNight;
-      moonHalo.material.opacity = wNight;
-      moon.visible = moonHalo.visible = wNight > 0.03;
+      moon.material.opacity = moonOp;
+      moonHalo.material.opacity = moonOp;
+      moon.visible = moonHalo.visible = moonOp > 0.02;
       // Key light hands off from sun to moon across the transition.
       orbLight.position.fromArray([0, 1, 2].map(j => op[j] * sunW + moon.position.getComponent(j) * wNight));
       orbLight.color.setHex(hex('orbLightColor'));
