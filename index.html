@@ -83,7 +83,6 @@
                 <sc-for list="{{ panel.places }}" as="place" hint-placeholder-count="4">
                   <div style="display: flex; align-items: baseline; gap: 12px; padding: 10px 12px; border-radius: 10px; background: {{ place.bg }};">
                     <div style="font-family: 'Cormorant Garamond', serif; font-size: 21px; color: #33242b; flex: 1;">{{ place.name }}</div>
-                    <div style="font-size: 12px; color: #9c8790; letter-spacing: .04em;">{{ place.note }}</div>
                   </div>
                 </sc-for>
               </div>
@@ -131,96 +130,96 @@ const IMG = 'images/';
 const CITIES = [
   {
     id: 'toronto', name: 'Toronto', kicker: 'stop one', lat: 10, lon: -105, landmark: 'cn',
-    blurb: 'Where it started being ordinary in the best way. Long walks west, dumplings, last calls.',
+    blurb: 'The city where we fell in love.',
     album: [
       'toronto_home_1.JPG', 'ossington_1.jpg', 'liliana_1.jpg', 'alfies_1.JPG',
       'riverdale_park_1.JPG', 'good_behavour_1.JPG', 'milou_1.jpg', 'run1_toronto.JPG'
     ],
     places: [
-      { slug: 'ossington', name: 'Ossington', note: 'the whole street',
+      { slug: 'ossington', name: 'Ossington',
         blurb: 'Favourite place to walk with you, we need to go try all the restaurants there! You introduced me to so many cool places in Toronto.',
         photos: ['ossington_1.jpg', 'osssington_2.jpg', 'ossington_3.jpg', 'ossington_4.jpg'] },
-      { slug: 'liliana', name: 'Liliana', note: 'dressed up',
+      { slug: 'liliana', name: 'Liliana',
         blurb: 'Best carpaccio I had!',
         photos: ['liliana_1.jpg', 'liliana_2.jpg', 'liliana_3.jpg', 'liliana_4.jpg'] },
-      { slug: 'laolao', name: 'Lao Lao Bar', note: 'our comfort thai',
+      { slug: 'laolao', name: 'Lao Lao Bar',
         blurb: 'Our comfort thai food place!',
         photos: ['lao_lao_bar.jpg', 'lao_lao_bar_2.jpg'] },
-      { slug: 'alfies', name: "Alfie's", note: 'the sandwich place',
+      { slug: 'alfies', name: "Alfie's",
         blurb: 'You changed my view on sandwiches. I will keep going there. hehe.',
         photos: ['alfies_1.JPG', 'alfies_2.JPG', 'alfies_3.JPG', 'alfies_4.JPG'] },
-      { slug: 'goodbehaviour', name: 'Good Behaviour', note: 'the ice cream run',
+      { slug: 'goodbehaviour', name: 'Good Behaviour',
         blurb: 'Fav ice cream place with you.',
         photos: ['good_behavour_1.JPG', 'good_behavoiur_2.JPG', 'good_behavoiur_3.JPG', 'good_behaviour_4.JPG'] },
-      { slug: 'milou', name: 'Milou', note: 'your comfort food',
+      { slug: 'milou', name: 'Milou',
         blurb: 'Your comfort food!',
         photos: ['milou_1.jpg', 'milou_2.jpg'] },
-      { slug: 'riverdale', name: 'Riverdale Park', note: 'the skyline bench',
+      { slug: 'riverdale', name: 'Riverdale Park',
         blurb: 'Beautiful sunset with the most beautiful person in the world.',
         photos: ['riverdale_park_1.JPG', 'riverdale_park_2.JPG', 'riverdale_park_3.JPG', 'riverdale_park_4.JPG'] },
-      { slug: 'runs', name: 'Our Runs', note: 'legs gone, worth it',
+      { slug: 'runs', name: 'Our Runs',
         blurb: 'First run together.',
         photos: ['run1_toronto.JPG', 'run2_toronto.JPG'] },
-      { slug: 'home', name: 'Home', note: 'where most of it happened',
+      { slug: 'home', name: 'Home',
         blurb: 'Piano, DWTS, bed rot, reading, and more! This is where we spent the most time together.',
         photos: ['toronto_home_1.JPG', 'toronto_home_2.JPG', 'toronot_home_3.JPG', 'toronto_home_4.JPG'] },
-      { slug: 'bedrot', name: 'Bed Rot Days', note: 'absolutely nothing, together',
+      { slug: 'bedrot', name: 'Bed Rot Days',
         blurb: 'There is no one I want to bed rot with except you.',
         photos: ['bedrot.jpg', 'bed_rot_2.jpg'] }
     ]
   },
   {
     id: 'montreal', name: 'Montréal', kicker: 'stop two', lat: 42, lon: -46, landmark: 'notredame',
-    blurb: 'Cobblestones, cold hands, too much food. The city that made us feel like we lived there.',
+    blurb: 'The city where we stayed cozy at the hotel.',
     album: [
       'christams_market_mtl.jpg', 'pichai_1.JPG', 'lexpress_mtl.JPG', 'la_banquise.jpg',
       'christmas_market_mtl_2.jpg', 'pichai_2.JPG', 'lexpress_mtl_2.JPG', 'christmas_market_mtl3.jpg'
     ],
     places: [
-      { slug: 'christmasmarket', name: 'Christmas Market', note: 'lights and cold hands',
+      { slug: 'christmasmarket', name: 'Christmas Market',
         blurb: 'Very cold, but cool christmas stalls!',
         photos: ['christams_market_mtl.jpg', 'christmas_market_mtl_2.jpg', 'christmas_market_mtl3.jpg', 'christmas_market_mtl_4.jpg'] },
-      { slug: 'pichai', name: 'Pichai', note: 'our favourite table',
+      { slug: 'pichai', name: 'Pichai',
         blurb: 'Best flank steak we had!!',
         photos: ['pichai_1.JPG', 'pichai_2.JPG', 'pichai_3.JPG'] },
-      { slug: 'banquise', name: 'La Banquise', note: 'the long line',
+      { slug: 'banquise', name: 'La Banquise',
         blurb: 'OG poutine, we waited a long line.',
         photos: ['la_banquise.jpg'] },
-      { slug: 'lexpress', name: "L'Express", note: 'first bone marrow',
+      { slug: 'lexpress', name: "L'Express",
         blurb: "L'Express, first bone marrow together!",
         photos: ['lexpress_mtl.JPG', 'lexpress_mtl_2.JPG', 'lexpress_mtl_3.JPG'] }
     ]
   },
   {
     id: 'newyork', name: 'New York', kicker: 'stop three', lat: -24, lon: -54, landmark: 'esb',
-    blurb: 'Loud, enormous, and somehow ours for a weekend. Bridge at golden hour, feet destroyed.',
+    blurb: 'The city where we walked as much as we ate good food.',
     album: [
       'empire_state_building.JPG', 'dumbo1.jpeg', 'centralpark1.jpg', 'grand_central_station.JPG',
       'time_square_1.jpg', 'grand_banks_1.JPG', 'apollo_bagel.JPG', 'emily_restaurant.jpg'
     ],
     places: [
-      { slug: 'centralpark', name: 'Central Park', note: 'the long loop',
+      { slug: 'centralpark', name: 'Central Park',
         blurb: 'I enjoyed my walks with you here! We should picnic here next time.',
         photos: ['centralpark1.jpg', 'centralpark2.jpg', 'centralpark3.jpg', 'centralpark4.JPG'] },
-      { slug: 'dumbo', name: 'DUMBO, Brooklyn', note: 'another sunset spot',
+      { slug: 'dumbo', name: 'DUMBO, Brooklyn',
         blurb: "Thanks for taking me to DUMBO even though I was borderline delirious and tired. Can't wait to watch another sunset with you.",
         photos: ['dumbo1.jpeg', 'dumbo2.JPG', 'dumbo3.JPG', 'dumbo4.JPG', 'IMG_1532.JPG'] },
-      { slug: 'grandcentral', name: 'Grand Central', note: 'so many times',
+      { slug: 'grandcentral', name: 'Grand Central',
         blurb: 'Walked through this station with you so many times!',
         photos: ['grand_central_station.JPG', 'grand_central_station_2.JPG', 'grand_central_station_3.JPG', 'grand_central_station_4.JPG'] },
-      { slug: 'timessquare', name: 'Times Square', note: 'far too many lights',
+      { slug: 'timessquare', name: 'Times Square',
         blurb: 'No amount of ads can steal my glance away from you.',
         photos: ['time_square_1.jpg', 'time_square_2.jpg'] },
-      { slug: 'grandbanks', name: 'Grand Banks', note: 'oysters on the water',
+      { slug: 'grandbanks', name: 'Grand Banks',
         blurb: 'Amazing rec from you as usual, best oysters I had.',
         photos: ['grand_banks_1.JPG', 'grand_banks2.JPG', 'grand_banks_3.JPG', 'grand_banks_4.JPG'] },
-      { slug: 'apollobagel', name: 'Apollo Bagels', note: 'worth the line',
+      { slug: 'apollobagel', name: 'Apollo Bagels',
         blurb: 'Lovely bagels with my love.',
         photos: ['apollo_bagel.JPG', 'appolo_bagel_2.JPG'] },
-      { slug: 'django', name: 'The Django', note: 'jazz downstairs',
+      { slug: 'django', name: 'The Django',
         blurb: 'Romantic jazz bar night! Thanks for finding the place after I said I wanted to go to a jazz bar.',
         photos: ['django1.JPG', 'django2.JPG', 'django3.JPG'] },
-      { slug: 'emily', name: 'Emily', note: 'the one we still talk about',
+      { slug: 'emily', name: 'Emily',
         blurb: 'Changed my view on what a good burger should look like. Still craving the Emily sauce.',
         photos: ['emily_restaurant.jpg', 'emily_restaurant_2.jpg'] }
     ]
@@ -232,8 +231,8 @@ const NEXT = {
   blurb: 'Empty land, on purpose. Pick one and I will build it into the map.',
   listTitle: 'the list we keep talking about',
   places: [
-    { name: 'Hong Kong', note: '' },
-    { name: 'Tokyo', note: '' }
+    { name: 'Hong Kong' },
+    { name: 'Tokyo' }
   ]
 };
 
@@ -251,7 +250,7 @@ CITIES.forEach(c => {
   c.places.forEach(p => {
     PANELS[c.id + ':' + p.slug] = {
       kicker: c.name, name: p.name,
-      blurb: p.blurb || (p.note.charAt(0).toUpperCase() + p.note.slice(1) + '. Write the real story here.'),
+      blurb: p.blurb || '',
       hasList: false, listTitle: '', places: [], hasPhotos: true, photoTitle: 'photos from this one',
       slots: slotsFrom('photo-' + c.id + '-' + p.slug, p.photos)
     };
@@ -319,7 +318,7 @@ class Component extends DCLogic {
     const panel = src ? {
       kicker: src.kicker, name: src.name, blurb: src.blurb,
       hasList: src.hasList, listTitle: src.listTitle,
-      places: src.places.map((pl, i) => ({ name: pl.name, note: pl.note, bg: i % 2 ? '#fffaf6' : '#f4f8fa' })),
+      places: src.places.map((pl, i) => ({ name: pl.name, bg: i % 2 ? '#fffaf6' : '#f4f8fa' })),
       hasPhotos: src.hasPhotos, photoTitle: src.photoTitle,
       slots: src.slots.map((s, i) => ({ id: s.id, src: s.src, hint: i === 0 ? 'Drop the best one' : 'Drop a photo' }))
     } : null;
@@ -339,10 +338,17 @@ class Component extends DCLogic {
 
   // Called straight from the Enter click, so the play() lands inside the user
   // gesture that browsers require. If the embed is still loading, remember the
-  // intent and start as soon as the controller exists.
+  // intent and start as soon as the controller exists. The same gesture
+  // unlocks the footstep audio (muted play-then-pause) so the tick loop may
+  // start and stop it freely afterwards.
   playMusic() {
     if (this.spotify) this.spotify.play();
     else this.wantsMusic = true;
+    const w = this.walkAudio;
+    if (w && !this.walkUnlocked) {
+      w.muted = true;
+      w.play().then(() => { w.pause(); w.currentTime = 0; w.muted = false; this.walkUnlocked = true; }).catch(() => {});
+    }
   }
 
   buildMusic() {
@@ -372,6 +378,9 @@ class Component extends DCLogic {
 
   componentDidMount() {
     this.buildMusic();
+    this.walkAudio = new Audio('walk_sound.mp3');
+    this.walkAudio.loop = true;
+    this.walkAudio.volume = 0.45;
     this.keys = {};
     this.onKey = (e) => {
       const k = e.key.toLowerCase();
@@ -427,6 +436,7 @@ class Component extends DCLogic {
   }
 
   componentWillUnmount() {
+    if (this.walkAudio) this.walkAudio.pause();
     window.removeEventListener('keydown', this.onKey);
     window.removeEventListener('keyup', this.onKey);
     window.removeEventListener('resize', this.onResize);
@@ -2151,6 +2161,19 @@ class Component extends DCLogic {
       } else {
         phase += dt * 1.2;
       }
+
+      // Footsteps track the walk: playing while moving, faster on shift,
+      // silent the moment she stops or a panel opens.
+      const wa = this.walkAudio;
+      if (wa && this.walkUnlocked) {
+        if (moving && !locked) {
+          wa.playbackRate = run > 1 ? 1.45 : 1;
+          if (wa.paused) wa.play().catch(() => {});
+        } else if (!wa.paused) {
+          wa.pause();
+        }
+      }
+
       f.sub(p.clone().multiplyScalar(p.dot(f))).normalize();
 
       // She turns to face where she's actually walking, so strafing reads as
