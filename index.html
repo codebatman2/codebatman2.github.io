@@ -1432,7 +1432,8 @@ class Component extends DCLogic {
       diner: () => this.diner(),
       bistro: () => this.bistro(),
       station: () => this.station(),
-      bridge: () => this.bridgeVenue(),
+      // Rotated so the deck reaches across the river toward Manhattan.
+      bridge: () => { const b = this.bridgeVenue(); b.rotation.y = Math.PI / 2; return b; },
       billboards: () => this.billboards(),
       boat: () => this.boat()
     };
@@ -1603,23 +1604,9 @@ class Component extends DCLogic {
       seg.position.y = y + th / 2; g.add(seg);
       y += th; w *= 0.74;
     }
-    const tank = this.waterTower();
-    tank.scale.setScalar(0.75);
-    tank.position.y = y;
-    g.add(tank);
-    return g;
-  }
-
-  waterTower() {
-    const g = new THREE.Group();
-    [[-0.28, -0.28], [0.28, -0.28], [-0.28, 0.28], [0.28, 0.28]].forEach(p => {
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.95, 4), this.mat(PALETTE.wood));
-      leg.position.set(p[0], 0.48, p[1]); g.add(leg);
-    });
-    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.0, 9), this.mat(0xa2764f));
-    tank.position.y = 1.45; g.add(tank);
-    const lid = new THREE.Mesh(new THREE.ConeGeometry(0.56, 0.42, 9), this.mat(0x7f5a3c));
-    lid.position.y = 2.15; g.add(lid);
+    const parapet = this.box(w * 1.18, 0.16, w * 1.18, PALETTE.stone);
+    parapet.position.y = y + 0.08;
+    g.add(parapet);
     return g;
   }
 
@@ -1787,6 +1774,25 @@ class Component extends DCLogic {
         globe.add(g);
         this.stops.push({ id: city.id + ':' + pl.slug, label: pl.name, dir: v3(pl.lat, pl.lon, 1), range: 0.055 });
       });
+
+      if (city.id === 'newyork') {
+        // The East River between Manhattan and DUMBO: a band of water across
+        // the DUMBO bearing, crossable only in the bridge corridor. The
+        // barrier itself is invisible; the tick's move check enforces it.
+        const dIdx = city.places.findIndex(p2 => p2.slug === 'dumbo');
+        const bearing = (dIdx / city.places.length) * Math.PI * 2 + 0.35;
+        const rc = offsetLatLon(city.lat, city.lon, 0.26, bearing);
+        this.riverDirs = [];
+        for (let t = -4; t <= 4; t++) {
+          const c2 = t === 0 ? rc : offsetLatLon(rc[0], rc[1], Math.abs(t) * 0.027, bearing + (t > 0 ? Math.PI / 2 : -Math.PI / 2));
+          const tile = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.4, 7), this.mat(PALETTE.ocean, { shininess: 50 }));
+          this.orient(tile, c2[0], c2[1], R + 0.08);
+          tile.rotateY(Math.random() * Math.PI);
+          globe.add(tile);
+          this.riverDirs.push(v3(c2[0], c2[1], 1));
+        }
+        this.riverN = new THREE.Vector3().crossVectors(v3(city.lat, city.lon, 1), v3(city.places[dIdx].lat, city.places[dIdx].lon, 1)).normalize();
+      }
     });
 
     addLandmark(NEXT, this.signpost(), 1.6, 6.6);
@@ -1891,10 +1897,28 @@ class Component extends DCLogic {
       this.starLayers.push({ mat: mat, base: cfg[3], speed: 0.5 + Math.random() * 0.9, phase: Math.random() * 6 });
     });
 
-    // One celestial body, recoloured and repositioned per preset: the moon at
-    // night, the low sun at golden hour.
-    const orb = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), new THREE.MeshBasicMaterial({ fog: false }));
+    // The sun (shared by day and sunset, repositioned and recoloured) and a
+    // separate moon that only night brings out. Both fade with their sky's
+    // weight so transitions crossfade rather than teleporting one orb.
+    const orb = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), new THREE.MeshBasicMaterial({ fog: false, transparent: true }));
     scene.add(orb);
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), new THREE.MeshBasicMaterial({ color: 0xfff3f7, fog: false, transparent: true, opacity: 0 }));
+    moon.scale.setScalar(26);
+    moon.position.set(-230, 300, -300);
+    scene.add(moon);
+    const mhC = document.createElement('canvas');
+    mhC.width = mhC.height = 256;
+    const mctx = mhC.getContext('2d');
+    const mg = mctx.createRadialGradient(128, 128, 10, 128, 128, 128);
+    mg.addColorStop(0, 'rgba(255,240,246,.75)');
+    mg.addColorStop(0.3, 'rgba(240,214,235,.28)');
+    mg.addColorStop(1, 'rgba(200,214,255,0)');
+    mctx.fillStyle = mg;
+    mctx.fillRect(0, 0, 256, 256);
+    const moonHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(mhC), transparent: true, depthWrite: false, fog: false, opacity: 0 }));
+    moonHalo.scale.set(210, 210, 1);
+    moonHalo.position.copy(moon.position);
+    scene.add(moonHalo);
     const haloCanvas = document.createElement('canvas');
     haloCanvas.width = haloCanvas.height = 256;
     const hctx = haloCanvas.getContext('2d');
@@ -1984,18 +2008,35 @@ class Component extends DCLogic {
       sun.intensity = num('sunInt');
       fill.color.setHex(hex('fillColor'));
       fill.intensity = num('fillInt');
-      // The orb doubles as sun and moon; blending its position swings it
-      // across the sky as you travel between time zones of our own making.
-      const op = [0, 1, 2].map(j => ps.reduce((a, s, i) => a + s.orbPos[j] * ws[i], 0));
+      // Sun: blend of the sunset and day presets only, faded by their
+      // combined weight. Moon: the night preset, faded by its weight.
+      // CITIES order is toronto(sunset), montreal(night), newyork(day).
+      const wNight = ws[1];
+      const sunW = Math.max(1e-6, ws[0] + ws[2]);
+      const sps = [SKIES.sunset, SKIES.day];
+      const sw = [ws[0] / sunW, ws[2] / sunW];
+      const snum = k => sps[0][k] * sw[0] + sps[1][k] * sw[1];
+      const op = [0, 1, 2].map(j => sps[0].orbPos[j] * sw[0] + sps[1].orbPos[j] * sw[1]);
       orb.position.fromArray(op);
-      orb.scale.setScalar(num('orbSize'));
-      orb.material.color.setHex(hex('orbColor'));
-      const hch = [0, 1, 2].map(k => [0, 1, 2, 3].map(j => ps.reduce((a, s, i) => a + s.halo[k][j] * ws[i], 0)));
+      orb.scale.setScalar(snum('orbSize'));
+      cA.setHex(sps[0].orbColor);
+      cB.setHex(sps[1].orbColor);
+      cA.lerp(cB, sw[1]);
+      orb.material.color.copy(cA);
+      orb.material.opacity = Math.min(1, sunW * 1.15);
+      orb.visible = sunW > 0.03;
+      const hch = [0, 1, 2].map(k => [0, 1, 2, 3].map(j => sps[0].halo[k][j] * sw[0] + sps[1].halo[k][j] * sw[1]));
       paintHalo.apply(null, hch.map(c => 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + c[3].toFixed(2) + ')'));
       halo.position.fromArray(op);
-      const hs = num('haloScale');
+      const hs = snum('haloScale');
       halo.scale.set(hs, hs, 1);
-      orbLight.position.fromArray(op);
+      halo.material.opacity = Math.min(1, sunW * 1.15);
+      halo.visible = orb.visible;
+      moon.material.opacity = wNight;
+      moonHalo.material.opacity = wNight;
+      moon.visible = moonHalo.visible = wNight > 0.03;
+      // Key light hands off from sun to moon across the transition.
+      orbLight.position.fromArray([0, 1, 2].map(j => op[j] * sunW + moon.position.getComponent(j) * wNight));
       orbLight.color.setHex(hex('orbLightColor'));
       orbLight.intensity = num('orbLightInt');
       this.starW = num('starW');
@@ -2066,9 +2107,17 @@ class Component extends DCLogic {
         // perpendicular to both up and the direction of travel.
         const axis = new THREE.Vector3().crossVectors(p, move).normalize();
         const ang = 0.085 * run * dt;
-        p.applyAxisAngle(axis, ang).normalize();
-        f.applyAxisAngle(axis, ang);
-        phase += ang * 95 * (run > 1 ? 1.2 : 1);
+        const pNew = p.clone().applyAxisAngle(axis, ang).normalize();
+        // Invisible barrier at the river: no wading, but the bridge corridor
+        // (the plane through Manhattan and DUMBO) stays open.
+        const wet = this.riverDirs
+          && this.riverDirs.some(d => pNew.angleTo(d) < 0.036)
+          && Math.abs(pNew.dot(this.riverN)) > 0.028;
+        if (!wet) {
+          p.copy(pNew);
+          f.applyAxisAngle(axis, ang);
+          phase += ang * 95 * (run > 1 ? 1.2 : 1);
+        }
       } else {
         phase += dt * 1.2;
       }
