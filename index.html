@@ -1447,6 +1447,13 @@ class Component extends DCLogic {
       billboards: () => this.billboards(),
       boat: () => this.boat()
     };
+    // Every venue stands on its own plot slab. The slab top is the venue's
+    // y=0, and its depth buries the seam with the terrain tiles below, so
+    // ground-hugging pieces (track, stones, blankets) can't be swallowed.
+    const PLOT = { park: PALETTE.leaf, runpath: PALETTE.leaf, house: PALETTE.leaf, boat: PALETTE.ocean };
+    const plate = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.3, 0.4, 10), this.mat(PLOT[kind] || PALETTE.paving));
+    plate.position.y = -0.2;
+    g.add(plate);
     g.add((builders[kind] || builders.house)());
     // Wide venues push the sign clear of their own footprint; everything
     // else uses the hut-era spot.
@@ -1768,7 +1775,9 @@ class Component extends DCLogic {
         pl.lat = c[0]; pl.lon = c[1];
         const g = new THREE.Group();
         g.add(this.venue(VENUE_KIND[pl.slug], [PALETTE.pink, PALETTE.blue, PALETTE.rose, 0xa9cfe4][i % 4], pl.name));
-        this.orient(g, pl.lat, pl.lon, R + 0.2);
+        // Tile tops sit at R+0.30; planting venues there (not R+0.2) keeps
+        // low geometry above the terrain instead of inside it.
+        this.orient(g, pl.lat, pl.lon, R + 0.31);
         g.rotateY(-bearing + Math.PI);
         globe.add(g);
         this.stops.push({ id: city.id + ':' + pl.slug, label: pl.name, dir: v3(pl.lat, pl.lon, 1), range: 0.055 });
@@ -1816,7 +1825,7 @@ class Component extends DCLogic {
           const c = offsetLatLon(city.lat, city.lon, dist, bearing);
           if (!freeSpot(c[0], c[1], rad)) continue;
           const g = make();
-          this.orient(g, c[0], c[1], R + 0.2);
+          this.orient(g, c[0], c[1], R + 0.3);
           g.rotateY(Math.random() * Math.PI * 2);
           globe.add(g);
           props.push({ dir: v3(c[0], c[1], 1), r: rad });
