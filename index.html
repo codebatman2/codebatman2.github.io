@@ -381,6 +381,8 @@ class Component extends DCLogic {
     this.walkAudio = new Audio('walk_sound.mp3');
     this.walkAudio.loop = true;
     this.walkAudio.volume = 0.45;
+    this.doorAudio = new Audio('open_door.mp3');
+    this.doorAudio.volume = 0.6;
     this.keys = {};
     this.onKey = (e) => {
       const k = e.key.toLowerCase();
@@ -388,6 +390,9 @@ class Component extends DCLogic {
       if (k === 'e' && this.state.near && !this.state.panel && !this.state.intro) {
         // The panel needs a visible cursor, so give the pointer back.
         this.unlockPointer();
+        // Keydown is a user gesture, so this needs no separate unlock.
+        this.doorAudio.currentTime = 0;
+        this.doorAudio.play().catch(() => {});
         this.setState({ panel: this.state.near.stop });
         return;
       }
