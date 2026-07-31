@@ -1791,7 +1791,9 @@ class Component extends DCLogic {
     const props = [];
     const freeSpot = (lat, lon, r) => {
       const d = v3(lat, lon, 1);
-      if (this.stops.some(st => d.angleTo(st.dir) < st.range + r)) return false;
+      // The extra 0.05 rad (~2 units) keeps scattered buildings clear of the
+      // name signs and plot slabs, which reach well past each stop's centre.
+      if (this.stops.some(st => d.angleTo(st.dir) < st.range + r + 0.05)) return false;
       if (props.some(s => d.angleTo(s.dir) < s.r + r)) return false;
       return true;
     };
