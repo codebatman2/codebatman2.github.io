@@ -276,7 +276,7 @@ const VENUE_KIND = {
   home: 'house', bedrot: 'house',
   christmasmarket: 'market', pichai: 'restaurant', banquise: 'diner', lexpress: 'bistro',
   centralpark: 'park', dumbo: 'bridge', grandcentral: 'station', timessquare: 'billboards',
-  grandbanks: 'boat', apollobagel: 'shop', django: 'bar', emily: 'restaurant'
+  grandbanks: 'boat', apollobagel: 'bagelshop', django: 'bar', emily: 'burger'
 };
 
 const PALETTE = {
@@ -728,12 +728,76 @@ class Component extends DCLogic {
     leg.position.y = 0.28; g.add(leg);
     const top = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.07, 8), this.mat(PALETTE.cream));
     top.position.y = 0.58; g.add(top);
+    // two chairs facing each other across the table
+    [0.62, -0.62].forEach(x => {
+      const seat = this.box(0.3, 0.06, 0.3, PALETTE.wood);
+      seat.position.set(x, 0.32, 0); g.add(seat);
+      const back = this.box(0.06, 0.34, 0.3, PALETTE.wood);
+      back.position.set(x + (x > 0 ? 0.13 : -0.13), 0.52, 0); g.add(back);
+      const cl = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.32, 4), this.mat(PALETTE.wood));
+      cl.position.set(x, 0.16, 0); g.add(cl);
+    });
     if (parasolTint) {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.0, 4), this.mat(PALETTE.wood));
       pole.position.y = 1.05; g.add(pole);
       const um = new THREE.Mesh(new THREE.ConeGeometry(0.62, 0.34, 7), this.mat(parasolTint));
       um.position.y = 1.55; g.add(um);
     }
+    return g;
+  }
+
+  // a swag of warm string lights between two posts
+  stringLights(width, y) {
+    const g = new THREE.Group();
+    [-width / 2, width / 2].forEach(x => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, y, 4), this.mat(0x4a4642));
+      p.position.set(x, y / 2, 0); g.add(p);
+    });
+    const n = 7;
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const bx = -width / 2 + t * width;
+      const sag = Math.sin(t * Math.PI) * 0.35;
+      const b = new THREE.Mesh(new THREE.SphereGeometry(0.055, 6, 5), this.mat(0xfff2c8, { emissive: 0xffd98a, emissiveIntensity: 0.85 }));
+      b.position.set(bx, y - sag, 0);
+      g.add(b);
+    }
+    return g;
+  }
+
+  // window box of flowers under a sill
+  flowerBox(w) {
+    const g = new THREE.Group();
+    const box = this.box(w, 0.14, 0.18, PALETTE.wood);
+    g.add(box);
+    for (let x = -w / 2 + 0.12; x <= w / 2 - 0.1; x += 0.16) {
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), this.mat([0xf6bccd, 0xdd8ba3, 0xfff0b8][Math.floor(Math.random() * 3)]));
+      f.position.set(x, 0.12, 0);
+      g.add(f);
+    }
+    return g;
+  }
+
+  flowerPatch() {
+    const g = new THREE.Group();
+    for (let i = 0; i < 6; i++) {
+      const a = Math.random() * Math.PI * 2, r = Math.random() * 0.3;
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 3), this.mat(PALETTE.leaf));
+      stem.position.set(Math.cos(a) * r, 0.11, Math.sin(a) * r); g.add(stem);
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), this.mat([0xf6bccd, 0xdd8ba3, 0xfff0b8, 0xbcd9ea][Math.floor(Math.random() * 4)]));
+      f.position.set(Math.cos(a) * r, 0.25, Math.sin(a) * r); g.add(f);
+    }
+    return g;
+  }
+
+  lampPost() {
+    const g = new THREE.Group();
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.7, 5), this.mat(0x3f4448));
+    pole.position.y = 0.85; g.add(pole);
+    const arm = this.box(0.4, 0.05, 0.05, 0x3f4448);
+    arm.position.set(0.18, 1.7, 0); g.add(arm);
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 7, 6), this.mat(0xfff2c8, { emissive: 0xffd98a, emissiveIntensity: 0.85 }));
+    lamp.position.set(0.38, 1.62, 0); g.add(lamp);
     return g;
   }
 
@@ -747,9 +811,27 @@ class Component extends DCLogic {
     door.position.set(-0.6, 0.55, 1.03); g.add(door);
     const win = this.box(1.0, 0.8, 0.1, PALETTE.blue, { shininess: 30 });
     win.position.set(0.5, 0.95, 1.03); g.add(win);
+    const fb = this.flowerBox(1.0);
+    fb.position.set(0.5, 0.48, 1.12); g.add(fb);
     g.add(this.awning(tint, 2.5, 1.35));
-    const t1 = this.patioTable(tint); t1.position.set(1.7, 0, 1.1); g.add(t1);
-    const t2 = this.patioTable(null); t2.position.set(2.1, 0, -0.2); g.add(t2);
+    // menu board by the door
+    const menu = new THREE.Group();
+    const mb = this.box(0.4, 0.55, 0.05, 0x4a4642);
+    mb.position.y = 0.6; menu.add(mb);
+    const mp = this.box(0.32, 0.4, 0.06, 0xfff6ee);
+    mp.position.y = 0.62; menu.add(mp);
+    menu.position.set(-1.05, 0, 1.25); menu.rotation.y = 0.3; g.add(menu);
+    // patio: two full tables under a swag of string lights, potted plants
+    const t1 = this.patioTable(tint); t1.position.set(1.75, 0, 1.15); g.add(t1);
+    const t2 = this.patioTable(null); t2.position.set(2.2, 0, -0.35); t2.rotation.y = 0.8; g.add(t2);
+    const lights = this.stringLights(2.4, 1.9);
+    lights.position.set(1.95, 0, 0.45); lights.rotation.y = Math.PI / 2; g.add(lights);
+    [[-1.35, 0.6], [1.1, 1.85]].forEach(p => {
+      const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.11, 0.22, 6), this.mat(0xc06a4f));
+      pot.position.set(p[0], 0.11, p[1]); g.add(pot);
+      const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(0.2, 0), this.mat(PALETTE.leaf));
+      bush.position.set(p[0], 0.35, p[1]); g.add(bush);
+    });
     return g;
   }
 
@@ -770,6 +852,51 @@ class Component extends DCLogic {
     const door = this.box(0.5, 1.05, 0.1, PALETTE.wood);
     door.position.set(-0.72, 0.52, 0.93); g.add(door);
     g.add(this.awning(tint, 2.2, 1.2));
+    return g;
+  }
+
+  bagelShop(tint) {
+    const g = this.shop(tint);
+    // a giant bagel standing on edge, sesame flecks on the crown
+    const bagel = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.26, 8, 14), this.mat(0xd9a05f));
+    bagel.position.y = 2.6; g.add(bagel);
+    for (let i = 0; i < 9; i++) {
+      const a = Math.random() * Math.PI * 2, b = Math.random() * Math.PI * 2;
+      const seed = this.box(0.05, 0.02, 0.08, 0xfff0d8);
+      seed.position.set(Math.cos(a) * 0.55 + Math.cos(b) * 0.24, 2.6 + Math.sin(a) * 0.55 + Math.sin(b) * 0.12, Math.sin(b) * 0.22);
+      seed.rotation.set(a, b, 0);
+      g.add(seed);
+    }
+    return g;
+  }
+
+  burgerJoint(tint) {
+    const g = this.restaurant(tint);
+    // stacked burger on the roof: bun, lettuce, patty, cheese, bun crown
+    const burger = new THREE.Group();
+    const layers = [
+      [0.62, 0.16, 0xe8b87f],
+      [0.66, 0.07, 0x8fce9f],
+      [0.6, 0.13, 0x8a5a3c],
+      [0.64, 0.05, 0xf5c84f],
+      [0.6, 0.1, 0xe8b87f]
+    ];
+    let y = 0;
+    layers.forEach(l => {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(l[0], l[0], l[1], 10), this.mat(l[2]));
+      m.position.y = y + l[1] / 2; burger.add(m);
+      y += l[1];
+    });
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), this.mat(0xe8b87f));
+    crown.position.y = y; burger.add(crown);
+    for (let i = 0; i < 6; i++) {
+      const a = i * 1.05;
+      const seed = this.box(0.045, 0.02, 0.07, 0xfff0d8);
+      seed.position.set(Math.cos(a) * 0.34, y + 0.42, Math.sin(a) * 0.34);
+      burger.add(seed);
+    }
+    burger.position.y = 2.1;
+    g.add(burger);
     return g;
   }
 
@@ -821,27 +948,55 @@ class Component extends DCLogic {
 
   parkVenue() {
     const g = new THREE.Group();
-    const mound = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.7, 0.3, 8), this.mat(PALETTE.leaf));
+    const mound = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.9, 0.3, 9), this.mat(PALETTE.leaf));
     mound.position.y = 0.15; g.add(mound);
-    [[-1.2, -0.6], [1.1, -0.9], [0.4, 0.9], [-0.6, 1.1]].forEach(p => {
-      const t = this.roundTree(0.7 + Math.random() * 0.3);
+    // pond with a stone lip
+    const pond = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.08, 9), this.mat(PALETTE.ocean, { shininess: 60 }));
+    pond.position.set(-1.0, 0.32, 0.55); g.add(pond);
+    const lip = new THREE.Mesh(new THREE.TorusGeometry(0.76, 0.07, 5, 10), this.mat(PALETTE.stone));
+    lip.rotation.x = Math.PI / 2; lip.position.set(-1.0, 0.33, 0.55); g.add(lip);
+    // trees and bushes
+    [[-1.7, -1.0], [1.3, -1.3], [0.5, 1.5], [-0.2, -1.6], [1.9, 0.6]].forEach(p => {
+      const t = this.roundTree(0.65 + Math.random() * 0.35);
       t.position.set(p[0], 0.3, p[1]); g.add(t);
     });
-    const bench = new THREE.Group();
-    const seat = this.box(0.9, 0.08, 0.3, PALETTE.wood);
-    seat.position.y = 0.35; bench.add(seat);
-    const back = this.box(0.9, 0.26, 0.07, PALETTE.wood);
-    back.position.set(0, 0.55, -0.13); bench.add(back);
-    [-0.35, 0.35].forEach(x => {
-      const l = this.box(0.07, 0.35, 0.26, 0x6b5b4a);
-      l.position.set(x, 0.17, 0); bench.add(l);
+    [[0.3, -0.6], [-1.9, 0.3], [1.0, 1.9]].forEach(p => {
+      const b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.28, 0), this.mat(0x8fce9f));
+      b.position.set(p[0], 0.42, p[1]); g.add(b);
     });
-    bench.position.set(1.3, 0.3, 0.4); bench.rotation.y = -0.7; g.add(bench);
-    for (let i = 0; i < 4; i++) {
-      const stone = this.box(0.5, 0.06, 0.4, PALETTE.paving);
-      stone.position.set(-0.2 + i * 0.42, 0.31, -0.4 - i * 0.28);
+    // flowers
+    [[-0.4, 1.3], [1.6, -0.4], [-1.5, 1.5]].forEach(p => {
+      const f = this.flowerPatch();
+      f.position.set(p[0], 0.3, p[1]); g.add(f);
+    });
+    // two benches facing the pond
+    [[-0.1, 0.35, 2.4], [-1.15, -0.5, 0.6]].forEach(cfg => {
+      const bench = new THREE.Group();
+      const seat = this.box(0.9, 0.08, 0.3, PALETTE.wood);
+      seat.position.y = 0.35; bench.add(seat);
+      const back = this.box(0.9, 0.26, 0.07, PALETTE.wood);
+      back.position.set(0, 0.55, -0.13); bench.add(back);
+      [-0.35, 0.35].forEach(x => {
+        const l = this.box(0.07, 0.35, 0.26, 0x6b5b4a);
+        l.position.set(x, 0.17, 0); bench.add(l);
+      });
+      bench.position.set(cfg[0], 0.3, cfg[1]); bench.rotation.y = cfg[2]; g.add(bench);
+    });
+    // winding path
+    for (let i = 0; i < 7; i++) {
+      const a = -1.2 + i * 0.4;
+      const stone = this.box(0.48, 0.06, 0.38, PALETTE.paving);
+      stone.position.set(Math.sin(a) * 1.7, 0.31, a * 0.9);
+      stone.rotation.y = -a * 0.4;
       g.add(stone);
     }
+    // lamp and a picnic blanket with a basket
+    const lamp = this.lampPost();
+    lamp.position.set(0.9, 0.3, 0.3); g.add(lamp);
+    const blanket = this.box(0.85, 0.03, 0.65, 0xf6bccd);
+    blanket.position.set(-0.15, 0.32, -0.9); blanket.rotation.y = 0.4; g.add(blanket);
+    const basket = this.box(0.22, 0.16, 0.16, 0xb98a63);
+    basket.position.set(0.05, 0.41, -1.0); g.add(basket);
     return g;
   }
 
@@ -1021,6 +1176,8 @@ class Component extends DCLogic {
       cafe: () => this.cafe(tint),
       shop: () => this.shop(tint),
       icecream: () => this.icecreamShop(tint),
+      bagelshop: () => this.bagelShop(tint),
+      burger: () => this.burgerJoint(tint),
       bar: () => this.barVenue(tint),
       storefronts: () => this.storefronts(),
       park: () => this.parkVenue(),
