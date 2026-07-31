@@ -235,11 +235,8 @@ const NEXT = {
   blurb: 'Empty land, on purpose. Pick one and I will build it into the map.',
   listTitle: 'the list we keep talking about',
   places: [
-    { name: 'Lisbon', note: 'tiles and pastéis' },
-    { name: 'Tokyo', note: 'the big one' },
-    { name: 'Mexico City', note: 'for the tacos, obviously' },
-    { name: 'Rome', note: 'somewhere warm' },
-    { name: 'Somewhere with no plan', note: 'your pick' }
+    { name: 'Hong Kong', note: '' },
+    { name: 'Tokyo', note: '' }
   ]
 };
 
@@ -271,7 +268,7 @@ PANELS[NEXT.id] = {
 // What each place renders as on the globe. Slugs not listed fall back to a
 // plain house.
 const VENUE_KIND = {
-  ossington: 'storefronts', liliana: 'restaurant', laolao: 'bar', alfies: 'shop',
+  ossington: 'storefronts', liliana: 'restaurant', laolao: 'bar', alfies: 'sandwich',
   goodbehaviour: 'icecream', milou: 'cafe', riverdale: 'park', runs: 'runpath',
   home: 'house', bedrot: 'house',
   christmasmarket: 'market', pichai: 'restaurant', banquise: 'diner', lexpress: 'bistro',
@@ -855,6 +852,26 @@ class Component extends DCLogic {
     return g;
   }
 
+  sandwichShop(tint) {
+    const g = this.shop(tint);
+    // a fat sandwich on the roof, fillings spilling past the crusts
+    const sw = new THREE.Group();
+    const bread1 = this.box(1.0, 0.2, 0.75, 0xe8b87f);
+    sw.add(bread1);
+    const lettuce = this.box(1.12, 0.07, 0.85, 0x8fce9f);
+    lettuce.position.y = 0.13; sw.add(lettuce);
+    const ham = this.box(1.06, 0.09, 0.8, 0xe89a9a);
+    ham.position.y = 0.21; sw.add(ham);
+    const cheese = this.box(1.1, 0.05, 0.82, 0xf5c84f);
+    cheese.position.set(0.06, 0.28, 0.04); cheese.rotation.y = 0.12; sw.add(cheese);
+    const bread2 = this.box(1.0, 0.22, 0.75, 0xd9a05f);
+    bread2.position.y = 0.42; sw.add(bread2);
+    sw.rotation.z = 0.14;
+    sw.position.y = 2.15;
+    g.add(sw);
+    return g;
+  }
+
   bagelShop(tint) {
     const g = this.shop(tint);
     // a giant bagel standing on edge, sesame flecks on the crown
@@ -1001,24 +1018,48 @@ class Component extends DCLogic {
   }
 
   runPath() {
+    // A proper oval running track: red surface, white lane dashes, grass
+    // infield, finish arch. Reads as a track from any angle, unlike a few
+    // path tiles that vanished against the paving.
     const g = new THREE.Group();
-    for (let i = 0; i < 6; i++) {
-      const a = -0.9 + i * 0.38;
-      const seg = this.box(0.85, 0.06, 0.55, 0xd8a48a);
-      seg.position.set(Math.sin(a) * 1.6, 0.03, a * 1.4);
-      seg.rotation.y = -a * 0.5;
+    const rx = 2.0, rz = 1.35, segs = 16;
+    for (let i = 0; i < segs; i++) {
+      const a = (i / segs) * Math.PI * 2;
+      const nx = Math.cos(a) * rx, nz = Math.sin(a) * rz;
+      const seg = this.box(0.95, 0.07, 0.62, 0xc95f4c);
+      seg.position.set(nx, 0.04, nz);
+      seg.rotation.y = -Math.atan2(Math.cos(a) * rz, -Math.sin(a) * rx);
       g.add(seg);
+      const dash = this.box(0.3, 0.09, 0.05, 0xfff6ee);
+      dash.position.set(nx, 0.04, nz);
+      dash.rotation.y = seg.rotation.y;
+      g.add(dash);
     }
+    // grass infield with a flower patch
+    const infield = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 0.1, 10), this.mat(PALETTE.leaf));
+    infield.scale.x = 1.35;
+    infield.position.y = 0.05; g.add(infield);
+    const fl = this.flowerPatch();
+    fl.position.set(0.2, 0.1, 0.1); g.add(fl);
+    // finish arch astride the track with a checkered banner
     const arch = new THREE.Group();
-    [-0.7, 0.7].forEach(x => {
-      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.9, 5), this.mat(PALETTE.rose));
-      p.position.set(x, 0.95, 0); arch.add(p);
+    [-0.75, 0.75].forEach(x => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.0, 5), this.mat(PALETTE.rose));
+      p.position.set(x, 1.0, 0); arch.add(p);
     });
-    const bar = this.box(1.6, 0.12, 0.12, PALETTE.rose);
-    bar.position.y = 1.9; arch.add(bar);
-    arch.position.set(-0.1, 0, -1.3); arch.rotation.y = 0.35; g.add(arch);
+    for (let i = 0; i < 6; i++) {
+      const sq = this.box(0.24, 0.24, 0.1, i % 2 ? 0xfff6ee : 0x3c3936);
+      sq.position.set(-0.6 + i * 0.24, 1.95, 0);
+      arch.add(sq);
+    }
+    arch.position.set(rx, 0, 0); arch.rotation.y = Math.PI / 2; g.add(arch);
+    // water fountain and a small flag by the start line
     const fount = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.75, 6), this.mat(PALETTE.slate));
-    fount.position.set(1.6, 0.38, 0.9); g.add(fount);
+    fount.position.set(-2.6, 0.38, 0.6); g.add(fount);
+    const flagPole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.3, 4), this.mat(PALETTE.wood));
+    flagPole.position.set(rx + 0.35, 0.65, 0.9); g.add(flagPole);
+    const flag = this.box(0.42, 0.26, 0.03, PALETTE.pink);
+    flag.position.set(rx + 0.56, 1.15, 0.9); g.add(flag);
     return g;
   }
 
@@ -1080,22 +1121,64 @@ class Component extends DCLogic {
   }
 
   station() {
+    // Grand Central's 42nd St face: steps up to a colonnade, three tall
+    // arched windows behind the columns, cornice, attic, and the clock
+    // front and centre.
     const g = new THREE.Group();
-    const body = this.box(4.2, 2.6, 2.2, PALETTE.limestone);
-    body.position.y = 1.3; g.add(body);
-    [-1.3, 0, 1.3].forEach(x => {
-      const win = this.box(0.75, 1.3, 0.1, PALETTE.glass, { shininess: 40 });
-      win.position.set(x, 1.2, 1.13); g.add(win);
-      const arch = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.1, 10, 1, false, 0, Math.PI), this.mat(PALETTE.glass, { shininess: 40 }));
+    for (let i = 0; i < 3; i++) {
+      const step = this.box(5.6 - i * 0.35, 0.14, 0.5, PALETTE.stone);
+      step.position.set(0, 0.07 + i * 0.14, 1.75 - i * 0.22);
+      g.add(step);
+    }
+    const plinth = this.box(5.2, 0.5, 2.6, PALETTE.stone);
+    plinth.position.y = 0.55; g.add(plinth);
+    const body = this.box(5.0, 2.9, 2.4, PALETTE.limestone);
+    body.position.y = 2.25; g.add(body);
+    // recessed glass wall so the windows read behind the columns
+    const glassWall = this.box(4.3, 2.3, 0.1, 0x8fa8bc, { shininess: 40 });
+    glassWall.position.set(0, 2.1, 1.16); g.add(glassWall);
+    [-1.45, 0, 1.45].forEach(x => {
+      const win = this.box(0.95, 1.9, 0.14, PALETTE.glass, { shininess: 50 });
+      win.position.set(x, 1.95, 1.18); g.add(win);
+      const arch = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.14, 12, 1, false, 0, Math.PI), this.mat(PALETTE.glass, { shininess: 50 }));
       arch.rotation.x = Math.PI / 2;
-      arch.position.set(x, 1.85, 1.13); g.add(arch);
+      arch.position.set(x, 2.9, 1.18); g.add(arch);
+      // mullions
+      const mull = this.box(0.05, 1.9, 0.16, PALETTE.stone);
+      mull.position.set(x, 1.95, 1.19); g.add(mull);
+      const mull2 = this.box(0.95, 0.05, 0.16, PALETTE.stone);
+      mull2.position.set(x, 2.3, 1.19); g.add(mull2);
     });
-    const cornice = this.box(4.5, 0.3, 2.4, PALETTE.stone);
-    cornice.position.y = 2.75; g.add(cornice);
-    const clockBase = this.box(0.8, 0.7, 0.3, PALETTE.stone);
-    clockBase.position.y = 3.25; g.add(clockBase);
-    const clock = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.1, 12), this.mat(0xfff6ee));
-    clock.rotation.x = Math.PI / 2; clock.position.set(0, 3.28, 0.18); g.add(clock);
+    // colonnade: paired columns between the arches, standing proud of the glass
+    [-2.15, -0.72, 0.72, 2.15].forEach(x => {
+      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.19, 2.9, 8), this.mat(PALETTE.limestone));
+      col.position.set(x, 2.25, 1.5); g.add(col);
+      const cap = this.box(0.46, 0.16, 0.46, PALETTE.stone);
+      cap.position.set(x, 3.65, 1.5); g.add(cap);
+      const base = this.box(0.44, 0.18, 0.44, PALETTE.stone);
+      base.position.set(x, 0.88, 1.5); g.add(base);
+    });
+    // entablature over the columns, then the cornice
+    const entab = this.box(5.3, 0.4, 3.0, PALETTE.limestone);
+    entab.position.set(0, 3.9, 0.35); g.add(entab);
+    const cornice = this.box(5.5, 0.22, 3.15, PALETTE.stone);
+    cornice.position.set(0, 4.2, 0.35); g.add(cornice);
+    // attic block wearing the clock, flanked by little acroteria
+    const attic = this.box(1.7, 0.95, 0.9, PALETTE.limestone);
+    attic.position.set(0, 4.75, 0.6); g.add(attic);
+    const clock = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.12, 14), this.mat(0xfff6ee));
+    clock.rotation.x = Math.PI / 2; clock.position.set(0, 4.78, 1.08); g.add(clock);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.05, 6, 14), this.mat(0xb08d57));
+    rim.position.set(0, 4.78, 1.12); g.add(rim);
+    // hands
+    const hh = this.box(0.05, 0.2, 0.03, 0x3c3936);
+    hh.position.set(0, 4.85, 1.15); g.add(hh);
+    const mh = this.box(0.04, 0.3, 0.03, 0x3c3936);
+    mh.position.set(0.08, 4.8, 1.15); mh.rotation.z = -1.1; g.add(mh);
+    [-0.95, 0.95].forEach(x => {
+      const acro = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 6), this.mat(0xb08d57));
+      acro.position.set(x, 4.4, 0.6); g.add(acro);
+    });
     return g;
   }
 
@@ -1177,6 +1260,7 @@ class Component extends DCLogic {
       shop: () => this.shop(tint),
       icecream: () => this.icecreamShop(tint),
       bagelshop: () => this.bagelShop(tint),
+      sandwich: () => this.sandwichShop(tint),
       burger: () => this.burgerJoint(tint),
       bar: () => this.barVenue(tint),
       storefronts: () => this.storefronts(),
@@ -1191,8 +1275,24 @@ class Component extends DCLogic {
       boat: () => this.boat()
     };
     g.add((builders[kind] || builders.house)());
+    // Wide venues push the sign clear of their own footprint; everything
+    // else uses the hut-era spot.
+    const SIGN_POS = {
+      station: [-3.4, 0, 2.2, 0.35],
+      bridge: [-3.3, 0, 1.6, 0.3],
+      storefronts: [-2.5, 0, 1.4, 0.25],
+      diner: [-2.6, 0, 1.3, 0.25],
+      boat: [-3.3, 0, 1.3, 0.3],
+      market: [-2.4, 0, 1.5, 0.25],
+      runpath: [-2.9, 0, 1.8, 0.3],
+      park: [-2.7, 0, 1.9, 0.3],
+      restaurant: [-2.2, 0, 1.4, 0.2],
+      burger: [-2.2, 0, 1.4, 0.2]
+    };
+    const pos = SIGN_POS[kind] || [-1.9, 0, 1.1, 0];
     const sign = this.placeSign(name);
-    sign.position.set(-1.9, 0, 1.1);
+    sign.position.set(pos[0], pos[1], pos[2]);
+    sign.rotation.y = pos[3];
     g.add(sign);
     return g;
   }
