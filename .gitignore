@@ -1,0 +1,11 @@
+.DS_Store
+
+# HEIC originals — every one has a committed .jpg twin that the page actually
+# loads, so shipping both would double the repo for no visible difference.
+images/*.HEIC
+images/*.heic
+
+# Local build/scratch artifacts, not part of the site.
+shots/
+uploads/
+.thumbnail

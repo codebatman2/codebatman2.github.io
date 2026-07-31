@@ -1,542 +1,1119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flower Bouquet Affirmations with Photos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #ffffff, #ffb6c1);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow-x: hidden;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        header {
-            margin-bottom: 40px;
-            animation: fadeIn 1.5s ease-out;
-        }
-        
-        h1 {
-            font-size: 4rem;
-            color: #e83e8c;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 15px;
-            background: linear-gradient(to right, #ff758c, #ff7eb3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .subtitle {
-            font-size: 1.6rem;
-            color: #6a5acd;
-            max-width: 700px;
-            margin: 0 auto 30px;
-            font-weight: 500;
-            line-height: 1.6;
-        }
-        
-        .bouquet-container {
-            position: relative;
-            height: 500px;
-            margin: 0 auto 50px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-        
-        .flower-unit {
-            position: absolute;
-            bottom: 0;
-            height: 380px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 1;
-        }
-        
-        .stem {
-            position: relative;
-            height: 320px;
-            width: 10px;
-            background: linear-gradient(to bottom, #2e8b57, #1a5d38);
-            border-radius: 5px;
-            z-index: 1;
-        }
-        
-        .leaf {
-            position: absolute;
-            font-size: 3rem;
-            color: #2e8b57;
-            z-index: 0;
-            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
-        }
-        
-        .flower {
-            position: relative;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            z-index: 10;
-            margin-bottom: 10px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
-            animation: float 4s ease-in-out infinite;
-        }
-        
-        .flower:hover {
-            transform: translateY(-10px) scale(1.1);
-            filter: brightness(1.1) drop-shadow(0 6px 8px rgba(0,0,0,0.2));
-        }
-        
-        .pink-flower {
-            color: #ffb6c1;
-        }
-        
-        .white-flower {
-            color: #fff;
-        }
-        
-        .flower i {
-            font-size: 5.5rem;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .flower-center {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 3;
-        }
-        
-        .pink-center {
-            background: radial-gradient(#ffd700, #daa520);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-        }
-        
-        .white-center {
-            background: radial-gradient(#ffd700, #daa520);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
-        }
-        
-        .instructions {
-            margin-top: 30px;
-            font-size: 1.3rem;
-            color: #555;
-            background: rgba(255, 255, 255, 0.7);
-            padding: 18px 30px;
-            border-radius: 50px;
-            display: inline-block;
-            max-width: 600px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .modal-content {
-            background: linear-gradient(135deg, #ffffff, #f9f0ff);
-            border-radius: 25px;
-            padding: 50px;
-            width: 90%;
-            max-width: 700px;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-            animation: slideUp 0.5s ease-out;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-        }
-        
-        .affirmation {
-            font-size: 2.1rem;
-            color: #6a5acd;
-            margin: 25px 0;
-            font-weight: 600;
-            line-height: 1.5;
-            font-style: italic;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-            padding: 0 20px;
-        }
-        
-        /* Enlarged photo container */
-        .photo-container {
-            width: 100%;
-            height: 500px;
-            margin: 30px auto;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 8px solid #fff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            background: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .affirmation-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-        
-        .placeholder-text {
-            font-size: 1.4rem;
-            color: #888;
-            font-style: italic;
-            padding: 20px;
-        }
-        
-        .close-btn {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 2.5rem;
-            color: #888;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        
-        .close-btn:hover {
-            color: #e83e8c;
-            background: rgba(232, 62, 140, 0.1);
-            transform: rotate(90deg);
-        }
-        
-        .heart-animation {
-            font-size: 3rem;
-            color: #e83e8c;
-            animation: pulse 1.5s infinite;
-            margin-top: 15px;
-        }
-        
-        footer {
-            margin-top: 50px;
-            color: #6a5acd;
-            font-size: 1.3rem;
-            font-weight: 500;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { 
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to { 
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
-        }
-        
-        @media (max-width: 900px) {
-            h1 { font-size: 3rem; }
-            .subtitle { font-size: 1.3rem; }
-            .modal-content { max-width: 90%; padding: 40px 30px; }
-            .affirmation { font-size: 1.8rem; }
-            .photo-container { height: 300px; }
-        }
-        
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .subtitle { font-size: 1.1rem; }
-            .bouquet-container { height: 400px; }
-            .flower-unit { height: 320px; }
-            .stem { height: 260px; }
-            .flower i { font-size: 4rem; }
-            .flower-center { width: 30px; height: 30px; }
-            .affirmation { font-size: 1.6rem; }
-            .photo-container { height: 250px; }
-            .instructions { font-size: 1.1rem; padding: 15px 25px; }
-        }
-        
-        @media (max-width: 480px) {
-            h1 { font-size: 2.2rem; }
-            .subtitle { font-size: 1rem; }
-            .affirmation { font-size: 1.4rem; }
-            .photo-container { height: 200px; }
-            .close-btn { top: 15px; right: 15px; font-size: 2rem; }
-        }
-        #spotify-player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000; /* Ensures it stays above other content */
-    background: rgba(255, 255, 255, 0.95); /* Optional: background for better visibility */
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow */
-    border-top: 1px solid rgba(255, 182, 193, 0.5); /* Optional: border to blend with your design */
-}
-
-
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Alina's Bouquet</h1>
-            <p class="subtitle">Happy National Girlfriend Day My Love
-        </header>
-        <div class="two-image-row">
-            <div class="image-pair">
-                <img src="labubu.png" alt="Image 1">
-            </div>
-            <div class="image-pair">
-                <img src="matcha.png" alt="Image 2">
-            </div>
-            </div>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.140.0/build/three.min.js"></script>
+<script src="./image-slot.js"></script>
+<script>
+  // Spotify calls this once, whenever its async script finishes — which may
+  // be before or after the component mounts. Queue the callers either way.
+  window.__spotifyQueue = [];
+  window.onSpotifyIframeApiReady = function (api) {
+    window.__spotifyApi = api;
+    window.__spotifyQueue.forEach(function (f) { f(api); });
+    window.__spotifyQueue = null;
+  };
+</script>
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #101a2b; }
+  * { box-sizing: border-box; }
+  a { color: #d8748f; text-decoration: none; }
+  a:hover { color: #b8536e; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #e3c9cf; border-radius: 8px; }
+  @keyframes floatUp { 0% { transform: translateY(6px); opacity: 0 } 100% { transform: translateY(0); opacity: 1 } }
+  @keyframes pulseSoft { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+</style>
+</helmet>
+<div style="position: fixed; inset: 0; font-family: Karla, sans-serif; color: #3a2c33;">
+  <div ref="{{ mount }}" style="position: absolute; inset: 0;"></div>
 
-    <div>
-    <a href="farmhouse.html">
-        <img src="farmhouse.jpg" alt="Farmhouse" style="width:300px; height:auto; border:2px solid #000; border-radius:8px; cursor:pointer;">
-    </a>
-    </div>
+  <div style="position: absolute; left: 28px; top: 24px; pointer-events: none;">
+    <div style="font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: .01em; color: #fff; text-shadow: 0 2px 10px rgba(20,30,50,.45);">Aura B &amp; Alina Boo</div>
+    <div style="font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.72); margin-top: 4px;">a world that belongs to us · 1/8</div>
+  </div>
 
-        <div class="bouquet-container">
-            <!-- Leftmost Flower Unit (Pink) -->
-            <div class="flower-unit" style="left: 10%;">
-                <div class="flower pink-flower" 
-                     data-affirmation="I love the way you roll your eyes at me"
-                     data-photo="Photo1.JPG">
-                    <i class="fas fa-spa"></i>
-                    <div class="flower-center pink-center"></div>
-                </div>
-                <div class="stem">
-                    <div class="leaf" style="left: -35px; top: 60%; transform: rotate(-30deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                    <div class="leaf" style="right: -35px; top: 40%; transform: rotate(30deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Second Flower Unit (Pink) -->
-            <div class="flower-unit" style="left: 25%;">
-                <div class="flower pink-flower" 
-                     data-affirmation="I love your sense of humour and creativity"
-                     data-photo="Photo2.JPG">
-                    <i class="fas fa-spa"></i>
-                    <div class="flower-center pink-center"></div>
-                </div>
-                <div class="stem">
-                    <div class="leaf" style="left: -30px; top: 50%; transform: rotate(-40deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                    <div class="leaf" style="right: -40px; top: 70%; transform: rotate(45deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Center Flower Unit (White) -->
-            <div class="flower-unit" style="left: 50%; transform: translateX(-50%);">
-                <div class="flower white-flower" 
-                     data-affirmation="Your girlfriend effect on me is amazing"
-                     data-photo="Photo3.JPG">
-                    <i class="fas fa-spa"></i>
-                    <div class="flower-center white-center"></div>
-                </div>
-                <div class="stem">
-                    <div class="leaf" style="left: -40px; top: 30%; transform: rotate(-50deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                    <div class="leaf" style="right: -40px; top: 60%; transform: rotate(50deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Fourth Flower Unit (White) -->
-            <div class="flower-unit" style="left: 70%;">
-                <div class="flower white-flower" 
-                     data-affirmation="You are a strong independent woman, the trailblazer of fashion and feminism"
-                     data-photo="Photo4.JPG">
-                    <i class="fas fa-spa"></i>
-                    <div class="flower-center white-center"></div>
-                </div>
-                <div class="stem">
-                    <div class="leaf" style="left: -35px; top: 70%; transform: rotate(-45deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                    <div class="leaf" style="right: -30px; top: 50%; transform: rotate(40deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Rightmost Flower Unit (White) -->
-            <div class="flower-unit" style="left: 85%;">
-                <div class="flower white-flower" 
-                     data-affirmation="My girlfriend is really cool"
-                     data-photo="Photo5.JPG">
-                    <i class="fas fa-spa"></i>
-                    <div class="flower-center white-center"></div>
-                </div>
-                <div class="stem">
-                    <div class="leaf" style="left: -40px; top: 40%; transform: rotate(-35deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                    <div class="leaf" style="right: -35px; top: 60%; transform: rotate(35deg);">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="instructions">
-            <i class="fas fa-mouse-pointer"></i> Click on any flower to reveal something cool
-        </div>
-        
-        <footer>
-            Made with <i class="fas fa-heart" style="color: #e83e8c;"></i> for ALINA 
-        </footer>
+  <div style="position: absolute; right: 28px; top: 26px; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+    <div style="pointer-events: none; color: rgba(255,255,255,.8); font-size: 11px; letter-spacing: .18em; text-transform: uppercase;">3 cities · 22 places</div>
+    <div onClick="{{ toggleSky }}" style="cursor: pointer; background: rgba(16,26,43,.42); backdrop-filter: blur(6px); color: rgba(255,255,255,.9); padding: 7px 15px; border-radius: 100px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;" style-hover="background: rgba(16,26,43,.68);">{{ skyLabel }}</div>
+  </div>
+
+  <div style="position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 18px; align-items: center; pointer-events: none; background: rgba(16,26,43,.42); backdrop-filter: blur(6px); padding: 9px 18px; border-radius: 100px; color: rgba(255,255,255,.85); font-size: 12px; letter-spacing: .06em;">
+    <span><b style="font-weight:700">W A S D</b> walk</span>
+    <span style="opacity:.4">·</span>
+    <span><b style="font-weight:700">Shift</b> run</span>
+    <span style="opacity:.4">·</span>
+    <span><b style="font-weight:700">Drag</b> to look</span>
+    <span style="opacity:.4">·</span>
+    <span><b style="font-weight:700">E</b> open a memory</span>
+  </div>
+
+  <sc-if value="{{ showPrompt }}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; animation: floatUp .3s ease both;">
+      <div style="font-family: 'Cormorant Garamond', serif; font-size: 30px; color: #fff; text-shadow: 0 3px 14px rgba(20,30,50,.6);">{{ promptLabel }}</div>
+      <div style="background: #fff6f2; color: #a8546c; padding: 7px 16px; border-radius: 100px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; animation: pulseSoft 1.8s ease-in-out infinite;">press E</div>
     </div>
-    
-    <!-- Affirmation Modal -->
-    <div class="modal" id="affirmationModal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeModal">&times;</span>
-            <div class="affirmation" id="affirmationText">
-                <!-- Affirmation will appear here -->
+  </sc-if>
+
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: absolute; inset: 0; display: flex; justify-content: flex-end; background: linear-gradient(90deg, rgba(16,26,43,0) 30%, rgba(16,26,43,.35) 100%);">
+      <div style="width: 560px; max-width: 92vw; height: 100%; background: #fffaf6; box-shadow: -24px 0 60px rgba(30,20,30,.28); display: flex; flex-direction: column; animation: floatUp .28s ease both;">
+        <div style="padding: 34px 40px 22px; border-bottom: 1px solid #f0e2da; display: flex; align-items: flex-start; gap: 20px;">
+          <div style="flex: 1;">
+            <div style="font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: #c08e9c;">{{ panel.kicker }}</div>
+            <div style="font-family: 'Cormorant Garamond', serif; font-size: 44px; line-height: 1.05; margin-top: 8px; color: #33242b;">{{ panel.name }}</div>
+            <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; color: #7d6670; margin-top: 10px; max-width: 40ch; text-wrap: pretty;">{{ panel.blurb }}</div>
+          </div>
+          <div onClick="{{ closePanel }}" style="cursor: pointer; width: 38px; height: 38px; border-radius: 100px; background: #eef4f7; color: #6d8898; display: flex; align-items: center; justify-content: center; font-size: 17px; flex: none;" style-hover="background: #dfe9ef;">✕</div>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 26px 40px 44px;">
+          <sc-if value="{{ panel.hasList }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-bottom: 34px;">
+              <div style="font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #b39aa3; margin-bottom: 12px;">{{ panel.listTitle }}</div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <sc-for list="{{ panel.places }}" as="place" hint-placeholder-count="4">
+                  <div style="display: flex; align-items: baseline; gap: 12px; padding: 10px 12px; border-radius: 10px; background: {{ place.bg }};">
+                    <div style="font-family: 'Cormorant Garamond', serif; font-size: 21px; color: #33242b; flex: 1;">{{ place.name }}</div>
+                    <div style="font-size: 12px; color: #9c8790; letter-spacing: .04em;">{{ place.note }}</div>
+                  </div>
+                </sc-for>
+              </div>
             </div>
-            
-            <!-- Enlarged Photo Container -->
-            <div class="photo-container">
-                <img id="affirmationPhoto" class="affirmation-photo" src="" alt="Special Photo">
-                <div class="placeholder-text">Your special photo will appear here</div>
-            </div>
-            
+          </sc-if>
+
+          <sc-if value="{{ panel.hasPhotos }}" hint-placeholder-val="{{ true }}">
             <div>
-                <i class="fas fa-heart heart-animation"></i>
+              <div style="font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #b39aa3; margin-bottom: 12px;">{{ panel.photoTitle }}</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <sc-for list="{{ panel.slots }}" as="slot" hint-placeholder-count="4">
+                  <div style="position: relative; width: 100%; aspect-ratio: 3 / 4;">
+                    <image-slot id="{{ slot.id }}" src="{{ slot.src }}" shape="rounded" radius="14" placeholder="{{ slot.hint }}"></image-slot>
+                  </div>
+                </sc-for>
+              </div>
             </div>
+          </sc-if>
         </div>
+      </div>
     </div>
+  </sc-if>
 
+  <div ref="{{ musicMount }}" style="{{ musicStyle }}"></div>
 
-    <!-- Spotify Player Container -->
-<div id="spotify-player">
-    <iframe src="https://open.spotify.com/embed/playlist/0onoo6GNifIK2z0EbJaAmG?utm_source=generator"
-            width="100%" 
-            height="100" 
-            frameBorder="0" 
-            allowfullscreen="" 
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
->
-    </iframe>
+  <sc-if value="{{ introOpen }}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; inset: 0; background: linear-gradient(165deg, #dceaf6 0%, #f0e2ee 46%, #f9dbe6 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; text-align: center;">
+      <div style="position: absolute; left: 50%; bottom: 132px; transform: translateX(-50%); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: #a58fa0;">our song</div>
+      <div style="font-size: 11px; letter-spacing: .34em; text-transform: uppercase; color: #8ba6bd;">1/8 · happy national girlfriend day</div>
+      <div style="font-family: 'Cormorant Garamond', serif; font-size: 86px; line-height: 1.02; color: #3b3140; max-width: 19ch; text-wrap: pretty;">Alina Boo's and Aura B's world capsule!</div>
+      <div onClick="{{ enter }}" style="cursor: pointer; margin-top: 8px; background: #3b3140; color: #fdf4f8; padding: 17px 46px; border-radius: 100px; font-size: 12px; letter-spacing: .26em; text-transform: uppercase; font-weight: 700;" style-hover="background: #7f93ad;">Enter our world</div>
+      <div style="font-size: 12px; color: #a99cab; letter-spacing: .12em;">for Alina Boo, from Aura B</div>
+    </div>
+  </sc-if>
 </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+const R = 40;
 
+// Every place below is backed by real photos in ./images. If you add a new
+// place, add its files here too — a place with an empty photos list renders
+// an album of blank slots.
+const IMG = 'images/';
 
+const CITIES = [
+  {
+    id: 'toronto', name: 'Toronto', kicker: 'stop one', lat: 10, lon: -105, landmark: 'cn',
+    blurb: 'Where it started being ordinary in the best way. Long walks west, dumplings, last calls.',
+    album: [
+      'toronto_home_1.JPG', 'ossington_1.jpg', 'liliana_1.jpg', 'alfies_1.JPG',
+      'riverdale_park_1.JPG', 'good_behavour_1.JPG', 'milou_1.jpg', 'run1_toronto.JPG'
+    ],
+    places: [
+      { slug: 'ossington', name: 'Ossington', note: 'the whole street',
+        blurb: 'Favourite place to walk with you, we need to go try all the restaurants there! You introduced me to so many cool places in Toronto.',
+        photos: ['ossington_1.jpg', 'osssington_2.jpg', 'ossington_3.jpg', 'ossington_4.jpg'] },
+      { slug: 'liliana', name: 'Liliana', note: 'dressed up',
+        blurb: 'Best carpaccio I had!',
+        photos: ['liliana_1.jpg', 'liliana_2.jpg', 'liliana_3.jpg', 'liliana_4.jpg'] },
+      { slug: 'laolao', name: 'Lao Lao Bar', note: 'our comfort thai',
+        blurb: 'Our comfort thai food place!',
+        photos: ['lao_lao_bar.jpg', 'lao_lao_bar_2.jpg'] },
+      { slug: 'alfies', name: "Alfie's", note: 'the sandwich place',
+        blurb: 'You changed my view on sandwiches. I will keep going there. hehe.',
+        photos: ['alfies_1.JPG', 'alfies_2.JPG', 'alfies_3.JPG', 'alfies_4.JPG'] },
+      { slug: 'goodbehaviour', name: 'Good Behaviour', note: 'the ice cream run',
+        blurb: 'Fav ice cream place with you.',
+        photos: ['good_behavour_1.JPG', 'good_behavoiur_2.JPG', 'good_behavoiur_3.JPG', 'good_behaviour_4.JPG'] },
+      { slug: 'milou', name: 'Milou', note: 'your comfort food',
+        blurb: 'Your comfort food!',
+        photos: ['milou_1.jpg', 'milou_2.jpg'] },
+      { slug: 'riverdale', name: 'Riverdale Park', note: 'the skyline bench',
+        blurb: 'Beautiful sunset with the most beautiful person in the world.',
+        photos: ['riverdale_park_1.JPG', 'riverdale_park_2.JPG', 'riverdale_park_3.JPG', 'riverdale_park_4.JPG'] },
+      { slug: 'runs', name: 'Our Runs', note: 'legs gone, worth it',
+        blurb: 'First run together.',
+        photos: ['run1_toronto.JPG', 'run2_toronto.JPG'] },
+      { slug: 'home', name: 'Home', note: 'where most of it happened',
+        blurb: 'Piano, DWTS, bed rot, reading, and more! This is where we spent the most time together.',
+        photos: ['toronto_home_1.JPG', 'toronto_home_2.JPG', 'toronot_home_3.JPG', 'toronto_home_4.JPG'] },
+      { slug: 'bedrot', name: 'Bed Rot Days', note: 'absolutely nothing, together',
+        blurb: 'There is no one I want to bed rot with except you.',
+        photos: ['bedrot.jpg', 'bed_rot_2.jpg'] }
+    ]
+  },
+  {
+    id: 'montreal', name: 'Montréal', kicker: 'stop two', lat: 42, lon: -46, landmark: 'notredame',
+    blurb: 'Cobblestones, cold hands, too much food. The city that made us feel like we lived there.',
+    album: [
+      'christams_market_mtl.jpg', 'pichai_1.JPG', 'lexpress_mtl.JPG', 'la_banquise.jpg',
+      'christmas_market_mtl_2.jpg', 'pichai_2.JPG', 'lexpress_mtl_2.JPG', 'christmas_market_mtl3.jpg'
+    ],
+    places: [
+      { slug: 'christmasmarket', name: 'Christmas Market', note: 'lights and cold hands',
+        blurb: 'Very cold, but cool christmas stalls!',
+        photos: ['christams_market_mtl.jpg', 'christmas_market_mtl_2.jpg', 'christmas_market_mtl3.jpg', 'christmas_market_mtl_4.jpg'] },
+      { slug: 'pichai', name: 'Pichai', note: 'our favourite table',
+        blurb: 'Best flank steak we had!!',
+        photos: ['pichai_1.JPG', 'pichai_2.JPG', 'pichai_3.JPG'] },
+      { slug: 'banquise', name: 'La Banquise', note: 'the long line',
+        blurb: 'OG poutine, we waited a long line.',
+        photos: ['la_banquise.jpg'] },
+      { slug: 'lexpress', name: "L'Express", note: 'first bone marrow',
+        blurb: "L'Express, first bone marrow together!",
+        photos: ['lexpress_mtl.JPG', 'lexpress_mtl_2.JPG', 'lexpress_mtl_3.JPG'] }
+    ]
+  },
+  {
+    id: 'newyork', name: 'New York', kicker: 'stop three', lat: -24, lon: -54, landmark: 'esb',
+    blurb: 'Loud, enormous, and somehow ours for a weekend. Bridge at golden hour, feet destroyed.',
+    album: [
+      'empire_state_building.JPG', 'dumbo1.jpeg', 'centralpark1.jpg', 'grand_central_station.JPG',
+      'time_square_1.jpg', 'grand_banks_1.JPG', 'apollo_bagel.JPG', 'emily_restaurant.jpg'
+    ],
+    places: [
+      { slug: 'centralpark', name: 'Central Park', note: 'the long loop',
+        blurb: 'I enjoyed my walks with you here! We should picnic here next time.',
+        photos: ['centralpark1.jpg', 'centralpark2.jpg', 'centralpark3.jpg', 'centralpark4.JPG'] },
+      { slug: 'dumbo', name: 'DUMBO, Brooklyn', note: 'another sunset spot',
+        blurb: "Thanks for taking me to DUMBO even though I was borderline delirious and tired. Can't wait to watch another sunset with you.",
+        photos: ['dumbo1.jpeg', 'dumbo2.JPG', 'dumbo3.JPG', 'dumbo4.JPG', 'IMG_1532.JPG'] },
+      { slug: 'grandcentral', name: 'Grand Central', note: 'so many times',
+        blurb: 'Walked through this station with you so many times!',
+        photos: ['grand_central_station.JPG', 'grand_central_station_2.JPG', 'grand_central_station_3.JPG', 'grand_central_station_4.JPG'] },
+      { slug: 'timessquare', name: 'Times Square', note: 'far too many lights',
+        blurb: 'No amount of ads can steal my glance away from you.',
+        photos: ['time_square_1.jpg', 'time_square_2.jpg'] },
+      { slug: 'grandbanks', name: 'Grand Banks', note: 'oysters on the water',
+        blurb: 'Amazing rec from you as usual, best oysters I had.',
+        photos: ['grand_banks_1.JPG', 'grand_banks2.JPG', 'grand_banks_3.JPG', 'grand_banks_4.JPG'] },
+      { slug: 'apollobagel', name: 'Apollo Bagels', note: 'worth the line',
+        blurb: 'Lovely bagels with my love.',
+        photos: ['apollo_bagel.JPG', 'appolo_bagel_2.JPG'] },
+      { slug: 'django', name: 'The Django', note: 'jazz downstairs',
+        blurb: 'Romantic jazz bar night! Thanks for finding the place after I said I wanted to go to a jazz bar.',
+        photos: ['django1.JPG', 'django2.JPG', 'django3.JPG'] },
+      { slug: 'emily', name: 'Emily', note: 'the one we still talk about',
+        blurb: 'Changed my view on what a good burger should look like. Still craving the Emily sauce.',
+        photos: ['emily_restaurant.jpg', 'emily_restaurant_2.jpg'] }
+    ]
+  }
+];
 
-  
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const flowers = document.querySelectorAll('.flower');
-            const modal = document.getElementById('affirmationModal');
-            const affirmationText = document.getElementById('affirmationText');
-            const affirmationPhoto = document.getElementById('affirmationPhoto');
-            const closeBtn = document.getElementById('closeModal');
-            const placeholderText = document.querySelector('.placeholder-text');
-            
-            // Add click event to each flower
-            flowers.forEach(flower => {
-                flower.addEventListener('click', function() {
-                    // Get affirmation text from data attribute
-                    const affirmation = this.getAttribute('data-affirmation');
-                    affirmationText.textContent = affirmation;
-                    
-                    // Get photo URL from data attribute
-                    const photoUrl = this.getAttribute('data-photo');
-                    
-                    // Set the photo source and display it
-                    if (photoUrl) {
-                        affirmationPhoto.src = photoUrl;
-                        affirmationPhoto.style.display = 'block';
-                        placeholderText.style.display = 'none';
-                    } else {
-                        affirmationPhoto.style.display = 'none';
-                        placeholderText.style.display = 'block';
-                    }
-                    
-                    // Show the modal
-                    modal.style.display = 'flex';
-                });
-            });
-            
-            // Close modal when close button is clicked
-            closeBtn.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-            
-            // Close modal when clicking outside the modal content
-            window.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-            
-            // Add floating animation delays
-            flowers.forEach((flower, index) => {
-                flower.style.animationDelay = `${index * 0.3}s`;
-            });
-        });
-    </script>
+const NEXT = {
+  id: 'next', name: 'Next stop?', kicker: 'to be continued', lat: 40, lon: -145, landmark: 'sign',
+  blurb: 'Empty land, on purpose. Pick one and I will build it into the map.',
+  listTitle: 'the list we keep talking about',
+  places: [
+    { name: 'Lisbon', note: 'tiles and pastéis' },
+    { name: 'Tokyo', note: 'the big one' },
+    { name: 'Mexico City', note: 'for the tacos, obviously' },
+    { name: 'Rome', note: 'somewhere warm' },
+    { name: 'Somewhere with no plan', note: 'your pick' }
+  ]
+};
+
+// Slot ids stay stable so a dropped-in replacement survives a reload; `src`
+// is the photo we ship, and a user drop wins over it.
+const slotsFrom = (prefix, files) => files.map((f, i) => ({ id: prefix + '-' + (i + 1), src: IMG + f }));
+
+const PANELS = {};
+CITIES.forEach(c => {
+  PANELS[c.id] = {
+    kicker: c.kicker, name: c.name, blurb: c.blurb, hasList: true, listTitle: 'where we went',
+    places: c.places, hasPhotos: true, photoTitle: 'our album for this city',
+    slots: slotsFrom('photo-' + c.id, c.album)
+  };
+  c.places.forEach(p => {
+    PANELS[c.id + ':' + p.slug] = {
+      kicker: c.name, name: p.name,
+      blurb: p.blurb || (p.note.charAt(0).toUpperCase() + p.note.slice(1) + '. Write the real story here.'),
+      hasList: false, listTitle: '', places: [], hasPhotos: true, photoTitle: 'photos from this one',
+      slots: slotsFrom('photo-' + c.id + '-' + p.slug, p.photos)
+    };
+  });
+});
+PANELS[NEXT.id] = {
+  kicker: NEXT.kicker, name: NEXT.name, blurb: NEXT.blurb, hasList: true, listTitle: NEXT.listTitle,
+  places: NEXT.places, hasPhotos: false, photoTitle: '', slots: []
+};
+
+const PALETTE = {
+  ocean: 0x9ecfe2, land: 0xaddcb8, land2: 0xc2e6c4, land3: 0x99d5ae,
+  limestone: 0xf2e7d8, stone: 0xdfd6cd, concrete: 0xcfd3d8, glass: 0x9fbfd4,
+  cream: 0xfff3ea, pink: 0xf6bccd, rose: 0xdd8ba3, blue: 0xbcd9ea, sand: 0xf7dcae,
+  leaf: 0x7cc294, trunk: 0xc09a7c, wood: 0xb98a63, slate: 0x8d93a8, copper: 0x9fc4b4
+};
+
+function offsetLatLon(lat, lon, angle, bearing) {
+  const la = lat * Math.PI / 180, lo = lon * Math.PI / 180;
+  const la2 = Math.asin(Math.sin(la) * Math.cos(angle) + Math.cos(la) * Math.sin(angle) * Math.cos(bearing));
+  const lo2 = lo + Math.atan2(Math.sin(bearing) * Math.sin(angle) * Math.cos(la), Math.cos(angle) - Math.sin(la) * Math.sin(la2));
+  return [la2 * 180 / Math.PI, lo2 * 180 / Math.PI];
+}
+
+function v3(lat, lon, r) {
+  const a = lat * Math.PI / 180, b = lon * Math.PI / 180;
+  return new THREE.Vector3(Math.cos(a) * Math.cos(b) * r, Math.sin(a) * r, Math.cos(a) * Math.sin(b) * r);
+}
+
+// ── Our song ────────────────────────────────────────────────────────────
+// Paste the track's Spotify URI here (Share → Copy link, then keep only the
+// id: open.spotify.com/track/<ID>?si=… → spotify:track:<ID>).
+const SPOTIFY_URI = 'spotify:track:4ZHGRFGwjnEIXHG2FhcDPv';
+
+// The embed lives outside the intro's sc-if so it survives entering the
+// world — unmounting it would stop the music. It just moves from a card on
+// the intro screen to a small dock in the corner.
+const MUSIC_BOX = 'position:absolute; z-index:30; border-radius:14px; overflow:hidden;'
+  + ' transition:opacity .45s ease; pointer-events:auto;';
+const MUSIC_INTRO = MUSIC_BOX + ' left:50%; bottom:40px; transform:translateX(-50%);'
+  + ' width:min(380px,86vw); box-shadow:0 12px 34px rgba(90,60,80,.20);';
+const MUSIC_DOCKED = MUSIC_BOX + ' right:28px; bottom:26px;'
+  + ' width:min(320px,78vw); box-shadow:0 12px 30px rgba(10,16,30,.45);';
+
+class Component extends DCLogic {
+  state = { intro: true, panel: null, near: null, night: false };
+  mount = React.createRef();
+  musicMount = React.createRef();
+
+  renderVals() {
+    const near = this.state.near;
+    const src = this.state.panel ? PANELS[this.state.panel] : null;
+    const panel = src ? {
+      kicker: src.kicker, name: src.name, blurb: src.blurb,
+      hasList: src.hasList, listTitle: src.listTitle,
+      places: src.places.map((pl, i) => ({ name: pl.name, note: pl.note, bg: i % 2 ? '#fffaf6' : '#f4f8fa' })),
+      hasPhotos: src.hasPhotos, photoTitle: src.photoTitle,
+      slots: src.slots.map((s, i) => ({ id: s.id, src: s.src, hint: i === 0 ? 'Drop the best one' : 'Drop a photo' }))
+    } : null;
+    return {
+      mount: this.mount,
+      musicMount: this.musicMount,
+      musicStyle: this.state.intro ? MUSIC_INTRO : MUSIC_DOCKED,
+      introOpen: this.state.intro,
+      panelOpen: !!panel,
+      panel: panel || { kicker: '', name: '', blurb: '', hasList: false, listTitle: '', places: [], hasPhotos: false, photoTitle: '', slots: [] },
+      showPrompt: !!near && !this.state.panel && !this.state.intro,
+      promptLabel: near ? near.label : '',
+      skyLabel: this.state.night ? 'golden hour' : 'starry night',
+      // The scene lives outside React, so repaint it directly rather than
+      // waiting on the re-render.
+      toggleSky: () => {
+        const night = !this.state.night;
+        if (this.applySky) this.applySky(night);
+        this.setState({ night: night });
+      },
+      enter: () => { this.playMusic(); this.setState({ intro: false }); },
+      closePanel: () => this.setState({ panel: null })
+    };
+  }
+
+  // Called straight from the Enter click, so the play() lands inside the user
+  // gesture that browsers require. If the embed is still loading, remember the
+  // intent and start as soon as the controller exists.
+  playMusic() {
+    if (this.spotify) this.spotify.play();
+    else this.wantsMusic = true;
+  }
+
+  buildMusic() {
+    if (/PASTE_TRACK_ID_HERE/.test(SPOTIFY_URI)) return;
+    const host = this.musicMount.current;
+    if (!host) return;
+    // Spotify replaces this node with its iframe. It's appended outside the
+    // template, so React never reconciles it away on re-render.
+    const seed = document.createElement('div');
+    host.appendChild(seed);
+    const make = (api) => api.createController(
+      seed,
+      { uri: SPOTIFY_URI, width: '100%', height: 80 },
+      (ctrl) => { this.spotify = ctrl; if (this.wantsMusic) ctrl.play(); }
+    );
+    if (window.__spotifyApi) make(window.__spotifyApi);
+    else if (window.__spotifyQueue) window.__spotifyQueue.push(make);
+  }
+
+  // Look direction lives here rather than in build()'s closure so the mouse
+  // handlers can reach it. yaw is consumed each frame; pitch is absolute.
+  look = { yaw: 0, pitch: 0.06 };
+
+  unlockPointer() {
+    if (document.pointerLockElement) document.exitPointerLock();
+  }
+
+  componentDidMount() {
+    this.buildMusic();
+    this.keys = {};
+    this.onKey = (e) => {
+      const k = e.key.toLowerCase();
+      if (k === 'escape') { this.setState({ panel: null }); return; }
+      if (k === 'e' && this.state.near && !this.state.panel && !this.state.intro) {
+        // The panel needs a visible cursor, so give the pointer back.
+        this.unlockPointer();
+        this.setState({ panel: this.state.near.stop });
+        return;
+      }
+      if (e.type === 'keydown' && ['w', 'a', 's', 'd', 'shift', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
+      this.keys[k] = e.type === 'keydown';
+    };
+    window.addEventListener('keydown', this.onKey);
+    window.addEventListener('keyup', this.onKey);
+    const wait = () => window.THREE ? this.build() : setTimeout(wait, 60);
+    wait();
+  }
+
+  // Two ways to look, so neither a mouse nor a trackpad is second-class.
+  // Drag is the everyday one. Double-click opts into pointer-lock free look
+  // (Esc releases it) — deliberately not a single click, or a stray click
+  // would swallow the cursor and leave the music player unclickable.
+  bindLook(el) {
+    const SENS = 0.0022, PITCH_MIN = -0.42, PITCH_MAX = 0.78;
+    let dragging = false;
+    const busy = () => this.state.panel || this.state.intro;
+
+    this.onMouseDown = (e) => {
+      if (e.button !== 0 || busy()) return;
+      dragging = true;
+      el.style.cursor = 'grabbing';
+    };
+    this.onMouseUp = () => {
+      dragging = false;
+      el.style.cursor = '';
+    };
+    this.onDblClick = () => {
+      if (busy() || document.pointerLockElement) return;
+      if (el.requestPointerLock) el.requestPointerLock();
+    };
+    this.onMouseMove = (e) => {
+      if (busy()) return;
+      if (!dragging && document.pointerLockElement !== el) return;
+      this.look.yaw -= (e.movementX || 0) * SENS;
+      this.look.pitch = Math.max(PITCH_MIN, Math.min(PITCH_MAX, this.look.pitch + (e.movementY || 0) * SENS));
+    };
+
+    el.addEventListener('mousedown', this.onMouseDown);
+    el.addEventListener('dblclick', this.onDblClick);
+    window.addEventListener('mouseup', this.onMouseUp);
+    window.addEventListener('mousemove', this.onMouseMove);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.onKey);
+    window.removeEventListener('keyup', this.onKey);
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('mouseup', this.onMouseUp);
+    window.removeEventListener('mousemove', this.onMouseMove);
+    this.unlockPointer();
+    cancelAnimationFrame(this.raf);
+    if (this.renderer) this.renderer.dispose();
+  }
+
+  mat(color, opts) { return new THREE.MeshPhongMaterial(Object.assign({ color: color, flatShading: true, shininess: 0, specular: 0x000000 }, opts || {})); }
+
+  orient(obj, lat, lon, r) {
+    const v = v3(lat, lon, r === undefined ? R : r);
+    obj.position.copy(v);
+    obj.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.clone().normalize());
+    return obj;
+  }
+
+  label(text, size, color) {
+    const pad = 24, fs = 64;
+    const c = document.createElement('canvas');
+    let ctx = c.getContext('2d');
+    ctx.font = '600 ' + fs + 'px Karla, sans-serif';
+    c.width = Math.ceil(ctx.measureText(text).width) + pad * 2;
+    c.height = fs + pad * 2;
+    ctx = c.getContext('2d');
+    ctx.font = '600 ' + fs + 'px Karla, sans-serif';
+    ctx.fillStyle = color || 'rgba(255,255,255,.95)';
+    ctx.strokeStyle = 'rgba(40,30,45,.55)';
+    ctx.lineWidth = 9;
+    ctx.textBaseline = 'middle';
+    ctx.strokeText(text, pad, c.height / 2);
+    ctx.fillText(text, pad, c.height / 2);
+    return this.sprite(c, size);
+  }
+
+  // a wooden hanging sign, drawn to canvas so it always faces the camera
+  signCanvas(text) {
+    const fs = 44, padX = 30, padY = 26, lh = 52;
+    const c = document.createElement('canvas');
+    let ctx = c.getContext('2d');
+    ctx.font = '700 ' + fs + 'px Karla, sans-serif';
+    const maxW = 420;
+    const words = text.split(' ');
+    const lines = [];
+    let line = '';
+    words.forEach(w => {
+      const t = line ? line + ' ' + w : w;
+      if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t;
+    });
+    lines.push(line);
+    const textW = Math.max.apply(null, lines.map(l => ctx.measureText(l).width));
+    const bw = Math.ceil(textW) + padX * 2, bh = lines.length * lh + padY * 2;
+    c.width = bw + 24; c.height = bh + 24;
+    ctx = c.getContext('2d');
+    const x = 12, y = 12, r = 16;
+    ctx.fillStyle = '#f6e5cf';
+    ctx.strokeStyle = '#a97c56';
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + bw, y, x + bw, y + bh, r);
+    ctx.arcTo(x + bw, y + bh, x, y + bh, r);
+    ctx.arcTo(x, y + bh, x, y, r);
+    ctx.arcTo(x, y, x + bw, y, r);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.font = '700 ' + fs + 'px Karla, sans-serif';
+    ctx.fillStyle = '#6b4a37';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    lines.forEach((l, i) => ctx.fillText(l, x + bw / 2, y + padY + lh / 2 + i * lh));
+    return c;
+  }
+
+  signBoard(text, width) {
+    const c = this.signCanvas(text);
+    const h = width * c.height / c.width;
+    const g = new THREE.Group();
+    const front = new THREE.CanvasTexture(c);
+    front.minFilter = THREE.LinearFilter;
+    const back = new THREE.CanvasTexture(c);
+    back.minFilter = THREE.LinearFilter;
+    const panel = new THREE.Mesh(new THREE.BoxGeometry(width, h, 0.12), this.mat(0xa97c56));
+    g.add(panel);
+    [[front, 0.075], [back, -0.075]].forEach(cfg => {
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(width, h), new THREE.MeshBasicMaterial({ map: cfg[0], transparent: true }));
+      face.position.z = cfg[1];
+      if (cfg[1] < 0) face.rotation.y = Math.PI;
+      g.add(face);
+    });
+    return g;
+  }
+
+  sprite(canvas, size) {
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.LinearFilter;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+    sp.scale.set(size * canvas.width / canvas.height, size, 1);
+    return sp;
+  }
+
+  cnTower() {
+    const g = new THREE.Group();
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 1.15, 11.5, 6, 1), this.mat(PALETTE.concrete));
+    shaft.position.y = 5.75; g.add(shaft);
+    // three buttress legs
+    for (let i = 0; i < 3; i++) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.55, 8.4, 0.75), this.mat(PALETTE.stone));
+      const a = i * Math.PI * 2 / 3;
+      leg.position.set(Math.cos(a) * 1.05, 4.2, Math.sin(a) * 1.05);
+      leg.rotation.y = -a;
+      leg.rotation.x = Math.cos(a) * 0.04;
+      g.add(leg);
+    }
+    const skirt = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.9, 0.8, 12), this.mat(PALETTE.stone));
+    skirt.position.y = 0.4; g.add(skirt);
+    // main pod: sloped underside, restaurant ring, roof
+    const under = new THREE.Mesh(new THREE.ConeGeometry(1.9, 1.5, 12), this.mat(PALETTE.concrete));
+    under.position.y = 8.9; under.rotation.x = Math.PI; g.add(under);
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.95, 1.95, 1.05, 12), this.mat(PALETTE.glass, { shininess: 30 }));
+    ring.position.y = 10.2; g.add(ring);
+    const deck = new THREE.Mesh(new THREE.CylinderGeometry(2.15, 2.15, 0.16, 12), this.mat(PALETTE.stone));
+    deck.position.y = 10.8; g.add(deck);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(1.6, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), this.mat(PALETTE.concrete));
+    dome.position.y = 10.9; dome.scale.y = 0.5; g.add(dome);
+    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.42, 5.4, 6, 1), this.mat(PALETTE.concrete));
+    upper.position.y = 13.4; g.add(upper);
+    // sky pod
+    const sky = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.75, 10), this.mat(PALETTE.glass, { shininess: 30 }));
+    sky.position.y = 14.4; g.add(sky);
+    const skyRim = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.12, 10), this.mat(PALETTE.stone));
+    skyRim.position.y = 14.85; g.add(skyRim);
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.3, 7.4, 6), this.mat(PALETTE.slate));
+    mast.position.y = 18.5; g.add(mast);
+    const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.09, 1.6, 5), this.mat(0xf08fa8));
+    tip.position.y = 22.4; g.add(tip);
+    return g;
+  }
+
+  esb() {
+    const g = new THREE.Group();
+    const add = (w, h, d, y, color) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), this.mat(color));
+      m.position.y = y + h / 2; g.add(m); return y + h;
+    };
+    let y = 0;
+    y = add(5.6, 2.6, 4.4, y, PALETTE.stone);      // five-storey base
+    y = add(4.6, 1.1, 3.6, y, PALETTE.limestone);  // first setback
+    y = add(3.5, 1.0, 3.0, y, PALETTE.stone);
+    y = add(2.5, 8.6, 2.5, y, PALETTE.limestone);  // the shaft
+    y = add(2.1, 1.5, 2.1, y, PALETTE.stone);      // upper setbacks
+    y = add(1.6, 1.2, 1.6, y, PALETTE.limestone);
+    y = add(1.15, 0.9, 1.15, y, PALETTE.stone);
+    // art-deco crown + mooring mast
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.78, 1.5, 8), this.mat(PALETTE.limestone));
+    crown.position.y = y + 0.75; g.add(crown);
+    const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.8, 8), this.mat(PALETTE.glass, { shininess: 30 }));
+    lantern.position.y = y + 1.9; g.add(lantern);
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.7, 8), this.mat(PALETTE.stone));
+    cap.position.y = y + 2.6; g.add(cap);
+    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.09, 4.4, 6), this.mat(PALETTE.slate));
+    ant.position.y = y + 5.1; g.add(ant);
+    // window banding
+    for (let i = 0; i < 7; i++) {
+      const band = new THREE.Mesh(new THREE.BoxGeometry(2.54, 0.16, 2.54), this.mat(PALETTE.glass));
+      band.position.y = 5.3 + i * 1.15; g.add(band);
+    }
+    return g;
+  }
+
+  notreDame() {
+    const g = new THREE.Group();
+    const nave = new THREE.Mesh(new THREE.BoxGeometry(4.6, 4.6, 7.4), this.mat(PALETTE.limestone));
+    nave.position.y = 2.3; g.add(nave);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(4.7, 1.5, 7.5), this.mat(PALETTE.copper));
+    roof.position.y = 5.3; g.add(roof);
+    // gabled west facade
+    const facade = new THREE.Mesh(new THREE.BoxGeometry(5.6, 6.4, 0.7), this.mat(PALETTE.limestone));
+    facade.position.set(0, 3.2, 3.9); g.add(facade);
+    const gable = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 1.7, 1.6, 3), this.mat(PALETTE.limestone));
+    gable.position.set(0, 7.0, 3.9); gable.rotation.y = Math.PI / 2; gable.rotation.z = Math.PI / 2; g.add(gable);
+    // rose window + three portals
+    const rose = new THREE.Mesh(new THREE.CircleGeometry(0.85, 14), this.mat(PALETTE.blue, { shininess: 40 }));
+    rose.position.set(0, 4.5, 4.28); g.add(rose);
+    [-1.35, 0, 1.35].forEach((x, i) => {
+      const arch = new THREE.Mesh(new THREE.BoxGeometry(i === 1 ? 1.15 : 0.85, i === 1 ? 2.5 : 2.1, 0.22), this.mat(0x8f6f5c));
+      arch.position.set(x, (i === 1 ? 1.25 : 1.05), 4.3); g.add(arch);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(i === 1 ? 0.58 : 0.43, i === 1 ? 0.58 : 0.43, 0.22, 10, 1, false, 0, Math.PI), this.mat(0x8f6f5c));
+      top.position.set(x, (i === 1 ? 2.5 : 2.1), 4.3); top.rotation.x = Math.PI / 2; top.rotation.z = -Math.PI / 2; g.add(top);
+    });
+    // twin square towers
+    [-2.5, 2.5].forEach(x => {
+      const t = new THREE.Mesh(new THREE.BoxGeometry(2.1, 10.6, 2.1), this.mat(PALETTE.limestone));
+      t.position.set(x, 5.3, 3.6); g.add(t);
+      const belfry = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.5, 1.9), this.mat(PALETTE.stone));
+      belfry.position.set(x, 11.3, 3.6); g.add(belfry);
+      const win = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.6, 0.18), this.mat(0x7b6a63));
+      win.position.set(x, 8.4, 4.68); g.add(win);
+      const parapet = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.35, 2.3), this.mat(PALETTE.stone));
+      parapet.position.set(x, 12.2, 3.6); g.add(parapet);
+      for (let i = 0; i < 4; i++) {
+        const pin = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.1, 4), this.mat(PALETTE.stone));
+        pin.position.set(x + (i % 2 ? 0.95 : -0.95), 12.8, 3.6 + (i < 2 ? 0.95 : -0.95));
+        g.add(pin);
+      }
+      const spire = new THREE.Mesh(new THREE.ConeGeometry(0.85, 2.2, 4), this.mat(PALETTE.copper));
+      spire.position.set(x, 13.3, 3.6); g.add(spire);
+    });
+    // buttresses along the nave
+    [-1, 1].forEach(s => {
+      for (let i = -2; i <= 2; i++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(0.5, 3.4, 0.5), this.mat(PALETTE.stone));
+        b.position.set(s * 2.4, 1.7, i * 1.5); g.add(b);
+      }
+    });
+    const steps = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.35, 1.2), this.mat(PALETTE.stone));
+    steps.position.set(0, 0.17, 4.7); g.add(steps);
+    return g;
+  }
+
+  signpost() {
+    const g = new THREE.Group();
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 4.4, 6), this.mat(PALETTE.wood));
+    post.position.y = 2.2; g.add(post);
+    [[2.4, 0.5, PALETTE.pink], [3.2, -0.5, PALETTE.blue], [4, 0.3, PALETTE.cream]].forEach(a => {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.5, 0.16), this.mat(a[2]));
+      arm.position.set(a[1] * 1.3, a[0], 0); g.add(arm);
+    });
+    const heart = new THREE.Mesh(new THREE.SphereGeometry(0.42, 7, 6), this.mat(PALETTE.rose));
+    heart.position.y = 4.9; g.add(heart);
+    return g;
+  }
+
+  // photo hut: a little cabin with a hanging sign and a framed picture out front
+  hut(tint, name) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.7, 2.1), this.mat(PALETTE.cream));
+    body.position.y = 0.85; g.add(body);
+    const roof = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 1.65, 1.25, 4), this.mat(tint));
+    roof.position.y = 2.35; roof.rotation.y = Math.PI / 4; g.add(roof);
+    const door = new THREE.Mesh(new THREE.BoxGeometry(0.62, 1.05, 0.1), this.mat(PALETTE.wood));
+    door.position.set(0, 0.52, 1.08); g.add(door);
+    [-0.65, 0.65].forEach(x => {
+      const w = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.1), this.mat(PALETTE.blue, { shininess: 30 }));
+      w.position.set(x, 1.15, 1.08); g.add(w);
+    });
+    // awning
+    const awn = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 0.8), this.mat(tint));
+    awn.position.set(0, 1.62, 1.45); awn.rotation.x = 0.22; g.add(awn);
+    // easel with a framed photo of us
+    const easel = new THREE.Group();
+    [-0.42, 0.42].forEach(x => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 1.5, 5), this.mat(PALETTE.wood));
+      leg.position.set(x, 0.75, 0); leg.rotation.z = x > 0 ? -0.1 : 0.1; easel.add(leg);
+    });
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.15, 0.1), this.mat(PALETTE.wood));
+    frame.position.y = 1.35; easel.add(frame);
+    const photo = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.9, 0.12), this.mat(PALETTE.pink, { shininess: 20 }));
+    photo.position.set(0, 1.35, 0.03); easel.add(photo);
+    [[-0.22, 1.42], [0.22, 1.42]].forEach(h => {
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 6), this.mat(0xfff0e4));
+      head.position.set(h[0], h[1], 0.1); easel.add(head);
+    });
+    easel.position.set(1.85, 0, 0.9);
+    easel.rotation.y = -0.5;
+    g.add(easel);
+    // hanging sign on two posts
+    const signGroup = new THREE.Group();
+    [-0.75, 0.75].forEach(x => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.5, 5), this.mat(PALETTE.wood));
+      p.position.set(x, 1.25, 0); signGroup.add(p);
+    });
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.1, 0.1), this.mat(PALETTE.wood));
+    bar.position.y = 2.45; signGroup.add(bar);
+    const board = this.signBoard(name, 1.85);
+    board.position.y = 1.85;
+    signGroup.add(board);
+    signGroup.position.set(-1.9, 0, 1.1);
+    g.add(signGroup);
+    return g;
+  }
+
+  tree(scale) {
+    const g = new THREE.Group();
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.13, 0.7, 5), this.mat(PALETTE.trunk));
+    t.position.y = 0.35; g.add(t);
+    const c = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.5, 6), this.mat(PALETTE.leaf));
+    c.position.y = 1.3; g.add(c);
+    g.scale.setScalar(scale);
+    return g;
+  }
+
+  character() {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.38, 0.9, 7), this.mat(PALETTE.rose));
+    body.position.y = 0.95; g.add(body);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), this.mat(0xf7dfc9));
+    head.position.y = 1.65; g.add(head);
+    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.37, 10, 8), this.mat(0x4a3230));
+    hair.position.y = 1.72; hair.scale.set(1, 0.85, 1); g.add(hair);
+    const legs = [], arms = [];
+    [-0.14, 0.14].forEach(x => {
+      const pivot = new THREE.Group();
+      pivot.position.set(x, 0.5, 0);
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.5, 5), this.mat(0x7f88a8));
+      leg.position.y = -0.25;
+      pivot.add(leg); g.add(pivot); legs.push(pivot);
+    });
+    [-0.36, 0.36].forEach(x => {
+      const pivot = new THREE.Group();
+      pivot.position.set(x, 1.4, 0);
+      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.6, 5), this.mat(PALETTE.pink));
+      arm.position.y = -0.3;
+      pivot.add(arm); g.add(pivot); arms.push(pivot);
+    });
+    const balloon = new THREE.Mesh(new THREE.SphereGeometry(0.3, 9, 7), this.mat(0xffb3c6));
+    balloon.position.set(0.55, 2.5, 0); g.add(balloon);
+    this.limbs = { legs: legs, arms: arms };
+    return g;
+  }
+
+  build() {
+    const el = this.mount.current;
+    if (!el) return;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1b2440);
+    scene.fog = new THREE.Fog(0x1b2440, 90, 190);
+
+    const camera = new THREE.PerspectiveCamera(52, el.clientWidth / el.clientHeight, 0.1, 900);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(el.clientWidth, el.clientHeight);
+    el.appendChild(renderer.domElement);
+    this.renderer = renderer;
+    this.bindLook(el);
+
+    const hemi = new THREE.HemisphereLight(0xe9ecff, 0x59718f, 0.62);
+    scene.add(hemi);
+    const sun = new THREE.DirectionalLight(0xffe9f2, 0.42);
+    sun.position.set(60, 90, 40);
+    scene.add(sun);
+    const fill = new THREE.DirectionalLight(0xbfd2f2, 0.22);
+    fill.position.set(-70, 30, -50);
+    scene.add(fill);
+
+    const globe = new THREE.Group();
+    scene.add(globe);
+    globe.add(new THREE.Mesh(new THREE.IcosahedronGeometry(R, 4), this.mat(PALETTE.ocean)));
+
+    const blobs = [
+      { lat: 8, lon: -88, rx: 78, ry: 62 },
+      { lat: -22, lon: 40, rx: 34, ry: 26 },
+      { lat: 46, lon: 120, rx: 30, ry: 22 }
+    ];
+    const landTiles = [];
+    blobs.forEach(b => {
+      for (let la = b.lat - b.ry; la <= b.lat + b.ry; la += 5.5) {
+        for (let lo = b.lon - b.rx; lo <= b.lon + b.rx; lo += 5.5) {
+          const dx = (lo - b.lon) / b.rx, dy = (la - b.lat) / b.ry;
+          if (dx * dx + dy * dy > 0.95 + Math.sin(lo * 0.7) * 0.12) continue;
+          const jl = la + (Math.random() - 0.5) * 2.2, jn = lo + (Math.random() - 0.5) * 2.2;
+          const col = [PALETTE.land, PALETTE.land2, PALETTE.land3][Math.floor(Math.random() * 3)];
+          const tile = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.4, 0.5, 6), this.mat(col));
+          this.orient(tile, jl, jn, R + 0.05);
+          tile.rotateY(Math.random() * Math.PI);
+          globe.add(tile);
+          landTiles.push([jl, jn]);
+        }
+      }
+    });
+
+    this.stops = [];
+    this.labels = [];
+    const addLandmark = (cfg, mesh, labelSize, labelY) => {
+      const g = new THREE.Group();
+      g.add(mesh);
+      const lab = this.label(cfg.name, labelSize, '#fff8f3');
+      lab.position.y = labelY;
+      g.add(lab);
+      this.orient(g, cfg.lat, cfg.lon, R + 0.2);
+      globe.add(g);
+      this.stops.push({ id: cfg.id, label: cfg.name, dir: v3(cfg.lat, cfg.lon, 1), range: 0.09 });
+      this.labels.push({ sp: lab, dir: v3(cfg.lat, cfg.lon, 1), full: 0.3, gone: 0.8, hideWhenNear: 0.09 });
+    };
+
+    CITIES.forEach(city => {
+      const lm = city.landmark === 'cn' ? this.cnTower() : city.landmark === 'esb' ? this.esb() : this.notreDame();
+      addLandmark(city, lm, 2.0, city.landmark === 'cn' ? 25 : city.landmark === 'esb' ? 22 : 17);
+
+      const cluster = new THREE.Group();
+      [[1.8, 12, 1.0, 0xffb3c6], [-2.2, 13.4, -1.4, 0xbcd9ea], [0.4, 14.6, -2.4, 0xf6b0d8]].forEach(b => {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.5, 9, 7), this.mat(b[3]));
+        m.position.set(b[0], b[1], b[2]);
+        cluster.add(m);
+      });
+      this.orient(cluster, city.lat, city.lon, R + 0.2);
+      globe.add(cluster);
+
+      city.places.forEach((pl, i) => {
+        const bearing = (i / city.places.length) * Math.PI * 2 + 0.35;
+        const dist = 0.3 + (i % 2 ? 0.055 : 0);
+        const c = offsetLatLon(city.lat, city.lon, dist, bearing);
+        pl.lat = c[0]; pl.lon = c[1];
+        const g = new THREE.Group();
+        g.add(this.hut([PALETTE.pink, PALETTE.blue, PALETTE.rose, 0xa9cfe4][i % 4], pl.name));
+        this.orient(g, pl.lat, pl.lon, R + 0.2);
+        g.rotateY(-bearing + Math.PI);
+        globe.add(g);
+        this.stops.push({ id: city.id + ':' + pl.slug, label: pl.name, dir: v3(pl.lat, pl.lon, 1), range: 0.055 });
+      });
+    });
+
+    addLandmark(NEXT, this.signpost(), 1.6, 6.6);
+
+    const clearOf = (lat, lon) => {
+      const d = v3(lat, lon, 1);
+      return !this.stops.some(st => d.angleTo(st.dir) < (st.range + 0.03));
+    };
+    for (let i = 0, placed = 0; i < 1200 && placed < 65; i++) {
+      const t = landTiles[Math.floor(Math.random() * landTiles.length)];
+      const la = t[0] + (Math.random() - 0.5) * 4, lo = t[1] + (Math.random() - 0.5) * 4;
+      if (!clearOf(la, lo)) continue;
+      const tr = this.tree(0.8 + Math.random() * 0.8);
+      this.orient(tr, la, lo, R + 0.2);
+      tr.rotateY(Math.random() * Math.PI);
+      globe.add(tr);
+      placed++;
+    }
+
+    // Sky dome. The gradient's stop 0 lands on the zenith and stop 1 on the
+    // horizon, so each preset reads top-of-sky first.
+    const skyCanvas = document.createElement('canvas');
+    skyCanvas.width = 8; skyCanvas.height = 256;
+    const sctx = skyCanvas.getContext('2d');
+    const skyTex = new THREE.CanvasTexture(skyCanvas);
+    const paintSky = (stops) => {
+      const grad = sctx.createLinearGradient(0, 0, 0, 256);
+      stops.forEach(s => grad.addColorStop(s[0], s[1]));
+      sctx.fillStyle = grad;
+      sctx.fillRect(0, 0, 8, 256);
+      skyTex.needsUpdate = true;
+    };
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(620, 32, 24), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, depthWrite: false, fog: false }));
+    scene.add(dome);
+    scene.background = null;
+    scene.fog = new THREE.Fog(0x1a2242, 110, 240);
+
+    // star layers
+    this.starLayers = [];
+    const starPoints = [];
+    [[1900, 1.1, 0xffffff, 0.55], [520, 2.1, 0xffe6f0, 0.8], [140, 3.4, 0xcfe0ff, 1]].forEach(cfg => {
+      const geo = new THREE.BufferGeometry();
+      const arr = [];
+      for (let i = 0; i < cfg[0]; i++) {
+        const v = new THREE.Vector3().randomDirection().multiplyScalar(420 + Math.random() * 130);
+        arr.push(v.x, v.y, v.z);
+      }
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+      const mat = new THREE.PointsMaterial({ color: cfg[2], size: cfg[1], sizeAttenuation: true, transparent: true, opacity: cfg[3], depthWrite: false, fog: false });
+      const pts = new THREE.Points(geo, mat);
+      scene.add(pts);
+      starPoints.push(pts);
+      this.starLayers.push({ mat: mat, base: cfg[3], speed: 0.5 + Math.random() * 0.9, phase: Math.random() * 6 });
+    });
+
+    // One celestial body, recoloured and repositioned per preset: the moon at
+    // night, the low sun at golden hour.
+    const orb = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 18), new THREE.MeshBasicMaterial({ fog: false }));
+    scene.add(orb);
+    const haloCanvas = document.createElement('canvas');
+    haloCanvas.width = haloCanvas.height = 256;
+    const hctx = haloCanvas.getContext('2d');
+    const haloTex = new THREE.CanvasTexture(haloCanvas);
+    const paintHalo = (inner, mid, outer) => {
+      hctx.clearRect(0, 0, 256, 256);
+      const hg = hctx.createRadialGradient(128, 128, 10, 128, 128, 128);
+      hg.addColorStop(0, inner);
+      hg.addColorStop(0.3, mid);
+      hg.addColorStop(1, outer);
+      hctx.fillStyle = hg;
+      hctx.fillRect(0, 0, 256, 256);
+      haloTex.needsUpdate = true;
+    };
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, transparent: true, depthWrite: false, fog: false }));
+    scene.add(halo);
+    const orbLight = new THREE.DirectionalLight(0xdfe6ff, 0.3);
+    scene.add(orbLight);
+
+    const SKIES = {
+      sunset: {
+        stops: [[0, '#4d7fbe'], [0.34, '#8fadd8'], [0.58, '#e7bda8'], [0.8, '#f4a179'], [1, '#e8827e']],
+        fog: 0xeda98c, fogNear: 150, fogFar: 340,
+        hemiSky: 0xffdcc0, hemiGround: 0xa8bcd0, hemiInt: 0.95,
+        sunColor: 0xffd7ad, sunInt: 0.9, fillColor: 0xd9c4e6, fillInt: 0.3,
+        orbPos: [-250, 78, -330], orbSize: 40, orbColor: 0xfff0d2,
+        halo: ['rgba(255,236,196,.92)', 'rgba(250,176,126,.42)', 'rgba(240,150,130,0)'],
+        haloScale: 400, orbLightColor: 0xffc79a, orbLightInt: 0.55, stars: false
+      },
+      night: {
+        stops: [[0, '#070d20'], [0.45, '#141d3f'], [0.78, '#2b2c50'], [1, '#4a3550']],
+        fog: 0x1a2242, fogNear: 110, fogFar: 240,
+        hemiSky: 0xe9ecff, hemiGround: 0x59718f, hemiInt: 0.62,
+        sunColor: 0xffe9f2, sunInt: 0.42, fillColor: 0xbfd2f2, fillInt: 0.22,
+        orbPos: [-230, 300, -300], orbSize: 26, orbColor: 0xfff3f7,
+        halo: ['rgba(255,240,246,.75)', 'rgba(240,214,235,.28)', 'rgba(200,214,255,0)'],
+        haloScale: 210, orbLightColor: 0xdfe6ff, orbLightInt: 0.3, stars: true
+      }
+    };
+
+    this.applySky = (night) => {
+      const s = SKIES[night ? 'night' : 'sunset'];
+      paintSky(s.stops);
+      scene.fog.color.setHex(s.fog);
+      scene.fog.near = s.fogNear;
+      scene.fog.far = s.fogFar;
+      hemi.color.setHex(s.hemiSky);
+      hemi.groundColor.setHex(s.hemiGround);
+      hemi.intensity = s.hemiInt;
+      sun.color.setHex(s.sunColor);
+      sun.intensity = s.sunInt;
+      fill.color.setHex(s.fillColor);
+      fill.intensity = s.fillInt;
+      orb.position.fromArray(s.orbPos);
+      orb.scale.setScalar(s.orbSize);
+      orb.material.color.setHex(s.orbColor);
+      paintHalo(s.halo[0], s.halo[1], s.halo[2]);
+      halo.position.fromArray(s.orbPos);
+      halo.scale.set(s.haloScale, s.haloScale, 1);
+      orbLight.position.fromArray(s.orbPos);
+      orbLight.color.setHex(s.orbLightColor);
+      orbLight.intensity = s.orbLightInt;
+      starPoints.forEach(pt => { pt.visible = s.stars; });
+      this.starsVisible = s.stars;
+    };
+    this.applySky(this.state.night);
+
+    // shooting star
+    const shootCanvas = document.createElement('canvas');
+    shootCanvas.width = 128; shootCanvas.height = 8;
+    const shctx = shootCanvas.getContext('2d');
+    const sg = shctx.createLinearGradient(0, 0, 128, 0);
+    sg.addColorStop(0, 'rgba(255,255,255,0)');
+    sg.addColorStop(0.85, 'rgba(255,236,246,.9)');
+    sg.addColorStop(1, 'rgba(255,255,255,1)');
+    shctx.fillStyle = sg;
+    shctx.fillRect(0, 0, 128, 8);
+    const shoot = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(shootCanvas), transparent: true, depthWrite: false, fog: false }));
+    shoot.scale.set(90, 5, 1);
+    shoot.visible = false;
+    scene.add(shoot);
+    this.shoot = { sp: shoot, t: 4, from: new THREE.Vector3(), to: new THREE.Vector3() };
+
+    const player = this.character();
+    scene.add(player);
+
+    const spawn = offsetLatLon(10, -105, 0.42, Math.PI * 1.15);
+    let p = v3(spawn[0], spawn[1], 1);
+    const target = v3(10, -105, 1);
+    let f = target.clone().sub(p.clone().multiplyScalar(p.dot(target))).normalize();
+    const face = f.clone();
+    let phase = 0;
+    const camPos = p.clone().multiplyScalar(R + 8);
+    const clock = new THREE.Clock();
+
+    this.onResize = () => {
+      if (!el.clientWidth) return;
+      camera.aspect = el.clientWidth / el.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(el.clientWidth, el.clientHeight);
+    };
+    window.addEventListener('resize', this.onResize);
+
+    const tick = () => {
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const k = this.keys;
+      const locked = this.state.panel || this.state.intro;
+      const run = k['shift'] ? 2 : 1;
+      const fwd = locked ? 0 : ((k['w'] ? 1 : 0) - (k['s'] ? 1 : 0));
+      const strafe = locked ? 0 : ((k['d'] ? 1 : 0) - (k['a'] ? 1 : 0));
+      // Arrows stay as turn keys so the world is still walkable with no mouse.
+      const turn = locked ? 0 : ((k['arrowleft'] ? 1 : 0) - (k['arrowright'] ? 1 : 0));
+
+      // Mouse yaw and arrow-key turn both just spin the forward vector about
+      // the local up. Consume the accumulated yaw so drags don't replay.
+      const yaw = locked ? 0 : this.look.yaw;
+      this.look.yaw = 0;
+      if (yaw || turn) f.applyAxisAngle(p, yaw + turn * 1.7 * dt);
+
+      const right = new THREE.Vector3().crossVectors(f, p).normalize();
+      const move = f.clone().multiplyScalar(fwd).add(right.multiplyScalar(strafe));
+      const moving = move.lengthSq() > 1e-6;
+      if (moving) {
+        move.normalize();
+        // Walking is a rotation of the position vector about the axis
+        // perpendicular to both up and the direction of travel.
+        const axis = new THREE.Vector3().crossVectors(p, move).normalize();
+        const ang = 0.085 * run * dt;
+        p.applyAxisAngle(axis, ang).normalize();
+        f.applyAxisAngle(axis, ang);
+        phase += ang * 95 * (run > 1 ? 1.2 : 1);
+      } else {
+        phase += dt * 1.2;
+      }
+      f.sub(p.clone().multiplyScalar(p.dot(f))).normalize();
+
+      // She turns to face where she's actually walking, so strafing reads as
+      // walking sideways rather than sliding. Eased, not snapped.
+      face.lerp(moving ? move : f, 1 - Math.pow(0.0001, dt));
+      face.sub(p.clone().multiplyScalar(p.dot(face)));
+      // A near-180° swing can lerp through the origin; normalizing that is NaN.
+      if (face.lengthSq() < 1e-8) face.copy(f);
+      face.normalize();
+
+      player.position.copy(p.clone().multiplyScalar(R + 0.25));
+      const m = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), face.clone().negate(), p);
+      player.quaternion.setFromRotationMatrix(m);
+      const swing = moving ? Math.sin(phase) * 0.55 : Math.sin(phase) * 0.05;
+      this.limbs.legs[0].rotation.x = swing;
+      this.limbs.legs[1].rotation.x = -swing;
+      this.limbs.arms[0].rotation.x = -swing * 0.8;
+      this.limbs.arms[1].rotation.x = swing * 0.8;
+      player.children[0].position.y = 0.95 + (moving ? Math.abs(Math.sin(phase)) * 0.05 : 0);
+
+      // Pitch raises the camera and drops the look target, so looking down
+      // pulls back and up rather than clipping through the ground.
+      const pit = this.look.pitch;
+      const want = p.clone().multiplyScalar(R + 5.2 + pit * 9).add(f.clone().multiplyScalar(-9 + pit * 1.5));
+      camPos.lerp(want, 1 - Math.pow(0.002, dt));
+      camera.position.copy(camPos);
+      camera.up.copy(p);
+      camera.lookAt(p.clone().multiplyScalar(R + 2.2 - pit * 5).add(f.clone().multiplyScalar(3)));
+
+      this.labels.forEach(L => {
+        const a = p.angleTo(L.dir);
+        if (L.hideWhenNear && a < L.hideWhenNear) { L.sp.visible = false; return; }
+        const o = a <= L.full ? 1 : a >= L.gone ? 0 : 1 - (a - L.full) / (L.gone - L.full);
+        L.sp.material.opacity = o;
+        L.sp.visible = o > 0.02;
+      });
+
+      let best = null, bestA = 9;
+      this.stops.forEach(s => {
+        const a = p.angleTo(s.dir);
+        if (a < s.range && a < bestA) { bestA = a; best = s; }
+      });
+      const cur = this.state.near;
+      if ((best && (!cur || cur.stop !== best.id)) || (!best && cur)) {
+        this.setState({ near: best ? { label: best.label, stop: best.id } : null });
+      }
+
+      const now = clock.elapsedTime;
+      const sh = this.shoot;
+      if (!this.starsVisible) {
+        // Golden hour: no twinkle, no shooting stars.
+        sh.sp.visible = false;
+        sh.life = 0;
+      } else {
+      this.starLayers.forEach(L => { L.mat.opacity = L.base * (0.72 + 0.28 * Math.sin(now * L.speed + L.phase)); });
+      sh.t -= dt;
+      if (sh.t <= 0) {
+        const dir = new THREE.Vector3().randomDirection().multiplyScalar(470);
+        sh.from.copy(dir);
+        sh.to.copy(dir).add(new THREE.Vector3().randomDirection().multiplyScalar(160));
+        sh.t = 4 + Math.random() * 7;
+        sh.life = 1.1;
+      }
+      if (sh.life > 0) {
+        sh.life -= dt;
+        const k2 = 1 - Math.max(sh.life, 0) / 1.1;
+        sh.sp.visible = true;
+        sh.sp.position.lerpVectors(sh.from, sh.to, k2);
+        sh.sp.material.opacity = Math.sin(k2 * Math.PI);
+      } else {
+        sh.sp.visible = false;
+      }
+      }
+
+      renderer.render(scene, camera);
+      this.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+}
+</script>
 </body>
 </html>
