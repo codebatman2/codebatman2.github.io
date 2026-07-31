@@ -331,19 +331,15 @@ class Component extends DCLogic {
       panel: panel || { kicker: '', name: '', blurb: '', hasList: false, listTitle: '', places: [], hasPhotos: false, photoTitle: '', slots: [] },
       showPrompt: !!near && !this.state.panel && !this.state.intro,
       promptLabel: near ? near.label : '',
-      enter: () => { this.playMusic(); this.setState({ intro: false }); },
+      enter: () => { this.unlockAudio(); this.setState({ intro: false }); },
       closePanel: () => this.setState({ panel: null })
     };
   }
 
-  // Called straight from the Enter click, so the play() lands inside the user
-  // gesture that browsers require. If the embed is still loading, remember the
-  // intent and start as soon as the controller exists. The same gesture
-  // unlocks the footstep audio (muted play-then-pause) so the tick loop may
-  // start and stop it freely afterwards.
-  playMusic() {
-    if (this.spotify) this.spotify.play();
-    else this.wantsMusic = true;
+  // The Enter click does NOT start the music — that's hers to press on the
+  // Spotify card if she wants it. The click only unlocks the footstep audio
+  // (muted play-then-pause) so the tick loop may start and stop it freely.
+  unlockAudio() {
     const w = this.walkAudio;
     if (w && !this.walkUnlocked) {
       w.muted = true;
@@ -362,7 +358,7 @@ class Component extends DCLogic {
     const make = (api) => api.createController(
       seed,
       { uri: SPOTIFY_URI, width: '100%', height: 80 },
-      (ctrl) => { this.spotify = ctrl; if (this.wantsMusic) ctrl.play(); }
+      (ctrl) => { this.spotify = ctrl; }
     );
     if (window.__spotifyApi) make(window.__spotifyApi);
     else if (window.__spotifyQueue) window.__spotifyQueue.push(make);
