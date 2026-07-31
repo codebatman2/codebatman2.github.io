@@ -44,10 +44,7 @@
     <div style="font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.72); margin-top: 4px;">a world that belongs to us · 1/8</div>
   </div>
 
-  <div style="position: absolute; right: 28px; top: 26px; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-    <div style="pointer-events: none; color: rgba(255,255,255,.8); font-size: 11px; letter-spacing: .18em; text-transform: uppercase;">3 cities · 22 places</div>
-    <div onClick="{{ toggleSky }}" style="cursor: pointer; background: rgba(16,26,43,.42); backdrop-filter: blur(6px); color: rgba(255,255,255,.9); padding: 7px 15px; border-radius: 100px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;" style-hover="background: rgba(16,26,43,.68);">{{ skyLabel }}</div>
-  </div>
+  <div style="position: absolute; right: 28px; top: 26px; text-align: right; pointer-events: none; color: rgba(255,255,255,.8); font-size: 11px; letter-spacing: .18em; text-transform: uppercase;">3 cities · 22 places</div>
 
   <div style="position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 18px; align-items: center; pointer-events: none; background: rgba(16,26,43,.42); backdrop-filter: blur(6px); padding: 9px 18px; border-radius: 100px; color: rgba(255,255,255,.85); font-size: 12px; letter-spacing: .06em;">
     <span><b style="font-weight:700">W A S D</b> walk</span>
@@ -312,7 +309,7 @@ const MUSIC_DOCKED = MUSIC_BOX + ' right:28px; bottom:26px;'
   + ' width:min(320px,78vw); box-shadow:0 12px 30px rgba(10,16,30,.45);';
 
 class Component extends DCLogic {
-  state = { intro: true, panel: null, near: null, night: false };
+  state = { intro: true, panel: null, near: null };
   mount = React.createRef();
   musicMount = React.createRef();
 
@@ -335,14 +332,6 @@ class Component extends DCLogic {
       panel: panel || { kicker: '', name: '', blurb: '', hasList: false, listTitle: '', places: [], hasPhotos: false, photoTitle: '', slots: [] },
       showPrompt: !!near && !this.state.panel && !this.state.intro,
       promptLabel: near ? near.label : '',
-      skyLabel: this.state.night ? 'golden hour' : 'starry night',
-      // The scene lives outside React, so repaint it directly rather than
-      // waiting on the re-render.
-      toggleSky: () => {
-        const night = !this.state.night;
-        if (this.applySky) this.applySky(night);
-        this.setState({ night: night });
-      },
       enter: () => { this.playMusic(); this.setState({ intro: false }); },
       closePanel: () => this.setState({ panel: null })
     };
@@ -1925,55 +1914,93 @@ class Component extends DCLogic {
     const orbLight = new THREE.DirectionalLight(0xdfe6ff, 0.3);
     scene.add(orbLight);
 
+    // Each city owns a time of day; the sky is a proximity-weighted blend of
+    // all three, so stepping toward a city crossfades the weather instead of
+    // snapping it. All presets share the same five gradient positions and the
+    // halo is stored as rgba channels so every field lerps cleanly.
+    const STOP_POS = [0, 0.35, 0.6, 0.8, 1];
     const SKIES = {
       sunset: {
-        // Keep the total intensity near the night preset's 1.56. Much above
-        // that and the pale wall colours clip to flat white.
-        stops: [[0, '#4d7fbe'], [0.34, '#8fadd8'], [0.58, '#e7bda8'], [0.8, '#f4a179'], [1, '#e8827e']],
+        // Keep the total light near 1.5; much above and pale walls clip white.
+        stops: ['#4d7fbe', '#8fadd8', '#e7bda8', '#f4a179', '#e8827e'],
         fog: 0xe39a80, fogNear: 130, fogFar: 300,
         hemiSky: 0xffc49a, hemiGround: 0x8fa6c2, hemiInt: 0.5,
         sunColor: 0xffb87e, sunInt: 0.52, fillColor: 0xc3addc, fillInt: 0.16,
         orbPos: [-250, 78, -330], orbSize: 40, orbColor: 0xffe6b8,
-        halo: ['rgba(255,226,170,.9)', 'rgba(248,162,112,.4)', 'rgba(238,138,120,0)'],
-        haloScale: 400, orbLightColor: 0xffa871, orbLightInt: 0.3, stars: false
+        halo: [[255, 226, 170, 0.9], [248, 162, 112, 0.4], [238, 138, 120, 0]],
+        haloScale: 400, orbLightColor: 0xffa871, orbLightInt: 0.3, starW: 0
+      },
+      day: {
+        stops: ['#3d7edb', '#6ba3e8', '#a7cdf2', '#d3e7fa', '#f0ead8'],
+        fog: 0xcfe0ef, fogNear: 140, fogFar: 330,
+        hemiSky: 0xeaf4ff, hemiGround: 0x9db8a8, hemiInt: 0.64,
+        sunColor: 0xfff4da, sunInt: 0.55, fillColor: 0xcfdcec, fillInt: 0.18,
+        orbPos: [160, 330, -200], orbSize: 26, orbColor: 0xfff9e6,
+        halo: [[255, 250, 230, 0.85], [255, 240, 200, 0.3], [255, 255, 255, 0]],
+        haloScale: 240, orbLightColor: 0xfff2d0, orbLightInt: 0.32, starW: 0
       },
       night: {
-        stops: [[0, '#070d20'], [0.45, '#141d3f'], [0.78, '#2b2c50'], [1, '#4a3550']],
+        stops: ['#070d20', '#101830', '#141d3f', '#2b2c50', '#4a3550'],
         fog: 0x1a2242, fogNear: 110, fogFar: 240,
         hemiSky: 0xe9ecff, hemiGround: 0x59718f, hemiInt: 0.62,
         sunColor: 0xffe9f2, sunInt: 0.42, fillColor: 0xbfd2f2, fillInt: 0.22,
         orbPos: [-230, 300, -300], orbSize: 26, orbColor: 0xfff3f7,
-        halo: ['rgba(255,240,246,.75)', 'rgba(240,214,235,.28)', 'rgba(200,214,255,0)'],
-        haloScale: 210, orbLightColor: 0xdfe6ff, orbLightInt: 0.3, stars: true
+        halo: [[255, 240, 246, 0.75], [240, 214, 235, 0.28], [200, 214, 255, 0]],
+        haloScale: 210, orbLightColor: 0xdfe6ff, orbLightInt: 0.3, starW: 1
       }
     };
+    const CITY_SKY = { toronto: 'sunset', newyork: 'day', montreal: 'night' };
 
-    this.applySky = (night) => {
-      const s = SKIES[night ? 'night' : 'sunset'];
-      paintSky(s.stops);
-      scene.fog.color.setHex(s.fog);
-      scene.fog.near = s.fogNear;
-      scene.fog.far = s.fogFar;
-      hemi.color.setHex(s.hemiSky);
-      hemi.groundColor.setHex(s.hemiGround);
-      hemi.intensity = s.hemiInt;
-      sun.color.setHex(s.sunColor);
-      sun.intensity = s.sunInt;
-      fill.color.setHex(s.fillColor);
-      fill.intensity = s.fillInt;
-      orb.position.fromArray(s.orbPos);
-      orb.scale.setScalar(s.orbSize);
-      orb.material.color.setHex(s.orbColor);
-      paintHalo(s.halo[0], s.halo[1], s.halo[2]);
-      halo.position.fromArray(s.orbPos);
-      halo.scale.set(s.haloScale, s.haloScale, 1);
-      orbLight.position.fromArray(s.orbPos);
-      orbLight.color.setHex(s.orbLightColor);
-      orbLight.intensity = s.orbLightInt;
-      starPoints.forEach(pt => { pt.visible = s.stars; });
-      this.starsVisible = s.stars;
+    const cA = new THREE.Color(), cB = new THREE.Color();
+    this.lastSkyW = null;
+    this.starW = 0;
+    this.updateSky = (pos) => {
+      // Inverse-square proximity weights: the nearest city dominates, but
+      // never discontinuously.
+      let ws = cityDirs.map(cd => { const d = pos.angleTo(cd); return 1 / (d * d + 0.03); });
+      const sum = ws.reduce((a, b) => a + b, 0);
+      ws = ws.map(w => w / sum);
+      if (this.lastSkyW && ws.every((w, i) => Math.abs(w - this.lastSkyW[i]) < 0.002)) return;
+      this.lastSkyW = ws;
+      const ps = CITIES.map(c => SKIES[CITY_SKY[c.id]]);
+      const num = k => ps.reduce((a, s, i) => a + s[k] * ws[i], 0);
+      const hex = k => {
+        cA.setRGB(0, 0, 0);
+        ps.forEach((s, i) => { cB.setHex(s[k]); cA.r += cB.r * ws[i]; cA.g += cB.g * ws[i]; cA.b += cB.b * ws[i]; });
+        return cA.getHex();
+      };
+      paintSky(STOP_POS.map((p2, si) => {
+        cA.setRGB(0, 0, 0);
+        ps.forEach((s, i) => { cB.set(s.stops[si]); cA.r += cB.r * ws[i]; cA.g += cB.g * ws[i]; cA.b += cB.b * ws[i]; });
+        return [p2, '#' + cA.getHexString()];
+      }));
+      scene.fog.color.setHex(hex('fog'));
+      scene.fog.near = num('fogNear');
+      scene.fog.far = num('fogFar');
+      hemi.color.setHex(hex('hemiSky'));
+      hemi.groundColor.setHex(hex('hemiGround'));
+      hemi.intensity = num('hemiInt');
+      sun.color.setHex(hex('sunColor'));
+      sun.intensity = num('sunInt');
+      fill.color.setHex(hex('fillColor'));
+      fill.intensity = num('fillInt');
+      // The orb doubles as sun and moon; blending its position swings it
+      // across the sky as you travel between time zones of our own making.
+      const op = [0, 1, 2].map(j => ps.reduce((a, s, i) => a + s.orbPos[j] * ws[i], 0));
+      orb.position.fromArray(op);
+      orb.scale.setScalar(num('orbSize'));
+      orb.material.color.setHex(hex('orbColor'));
+      const hch = [0, 1, 2].map(k => [0, 1, 2, 3].map(j => ps.reduce((a, s, i) => a + s.halo[k][j] * ws[i], 0)));
+      paintHalo.apply(null, hch.map(c => 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + c[3].toFixed(2) + ')'));
+      halo.position.fromArray(op);
+      const hs = num('haloScale');
+      halo.scale.set(hs, hs, 1);
+      orbLight.position.fromArray(op);
+      orbLight.color.setHex(hex('orbLightColor'));
+      orbLight.intensity = num('orbLightInt');
+      this.starW = num('starW');
+      starPoints.forEach(pt => { pt.visible = this.starW > 0.03; });
     };
-    this.applySky(this.state.night);
 
     // shooting star
     const shootCanvas = document.createElement('canvas');
@@ -2002,6 +2029,9 @@ class Component extends DCLogic {
     let phase = 0;
     const camPos = p.clone().multiplyScalar(R + 8);
     const clock = new THREE.Clock();
+
+    // Paint the spawn city's sky before the first frame renders.
+    this.updateSky(p);
 
     this.onResize = () => {
       if (!el.clientWidth) return;
@@ -2089,14 +2119,18 @@ class Component extends DCLogic {
         this.setState({ near: best ? { label: best.label, stop: best.id } : null });
       }
 
+      this.updateSky(p);
+
       const now = clock.elapsedTime;
+      // Stars fade with the night weight so they dissolve on the walk out of
+      // Montréal instead of vanishing at a line.
+      this.starLayers.forEach(L => { L.mat.opacity = this.starW * L.base * (0.72 + 0.28 * Math.sin(now * L.speed + L.phase)); });
       const sh = this.shoot;
-      if (!this.starsVisible) {
-        // Golden hour: no twinkle, no shooting stars.
+      if (this.starW < 0.4) {
+        // Not night enough for shooting stars.
         sh.sp.visible = false;
         sh.life = 0;
       } else {
-      this.starLayers.forEach(L => { L.mat.opacity = L.base * (0.72 + 0.28 * Math.sin(now * L.speed + L.phase)); });
       sh.t -= dt;
       if (sh.t <= 0) {
         const dir = new THREE.Vector3().randomDirection().multiplyScalar(470);
