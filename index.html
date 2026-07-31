@@ -1286,6 +1286,18 @@ class Component extends DCLogic {
 
   bridgeVenue() {
     const g = new THREE.Group();
+    // the river runs beneath the full span, banks on both sides
+    const water = this.box(6.6, 0.14, 2.3, PALETTE.ocean, { shininess: 60 });
+    water.position.y = 0.07; g.add(water);
+    [-1.25, 1.25].forEach(z => {
+      const bank = this.box(6.6, 0.2, 0.25, PALETTE.stone);
+      bank.position.set(0, 0.1, z); g.add(bank);
+    });
+    // a couple of glints on the water
+    [[-2.1, 0.3], [0.6, -0.4], [2.3, 0.2]].forEach(pt => {
+      const glint = this.box(0.5, 0.02, 0.08, 0xd8f0f6);
+      glint.position.set(pt[0], 0.15, pt[1]); g.add(glint);
+    });
     const deck = this.box(6.4, 0.18, 0.9, PALETTE.stone);
     deck.position.y = 1.5; g.add(deck);
     [-1.8, 1.8].forEach(x => {
@@ -1432,8 +1444,7 @@ class Component extends DCLogic {
       diner: () => this.diner(),
       bistro: () => this.bistro(),
       station: () => this.station(),
-      // Rotated so the deck reaches across the river toward Manhattan.
-      bridge: () => { const b = this.bridgeVenue(); b.rotation.y = Math.PI / 2; return b; },
+      bridge: () => this.bridgeVenue(),
       billboards: () => this.billboards(),
       boat: () => this.boat()
     };
@@ -1775,24 +1786,6 @@ class Component extends DCLogic {
         this.stops.push({ id: city.id + ':' + pl.slug, label: pl.name, dir: v3(pl.lat, pl.lon, 1), range: 0.055 });
       });
 
-      if (city.id === 'newyork') {
-        // The East River between Manhattan and DUMBO: a band of water across
-        // the DUMBO bearing, crossable only in the bridge corridor. The
-        // barrier itself is invisible; the tick's move check enforces it.
-        const dIdx = city.places.findIndex(p2 => p2.slug === 'dumbo');
-        const bearing = (dIdx / city.places.length) * Math.PI * 2 + 0.35;
-        const rc = offsetLatLon(city.lat, city.lon, 0.26, bearing);
-        this.riverDirs = [];
-        for (let t = -4; t <= 4; t++) {
-          const c2 = t === 0 ? rc : offsetLatLon(rc[0], rc[1], Math.abs(t) * 0.027, bearing + (t > 0 ? Math.PI / 2 : -Math.PI / 2));
-          const tile = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.4, 7), this.mat(PALETTE.ocean, { shininess: 50 }));
-          this.orient(tile, c2[0], c2[1], R + 0.08);
-          tile.rotateY(Math.random() * Math.PI);
-          globe.add(tile);
-          this.riverDirs.push(v3(c2[0], c2[1], 1));
-        }
-        this.riverN = new THREE.Vector3().crossVectors(v3(city.lat, city.lon, 1), v3(city.places[dIdx].lat, city.places[dIdx].lon, 1)).normalize();
-      }
     });
 
     addLandmark(NEXT, this.signpost(), 1.6, 6.6);
@@ -2140,17 +2133,9 @@ class Component extends DCLogic {
         // perpendicular to both up and the direction of travel.
         const axis = new THREE.Vector3().crossVectors(p, move).normalize();
         const ang = 0.085 * run * dt;
-        const pNew = p.clone().applyAxisAngle(axis, ang).normalize();
-        // Invisible barrier at the river: no wading, but the bridge corridor
-        // (the plane through Manhattan and DUMBO) stays open.
-        const wet = this.riverDirs
-          && this.riverDirs.some(d => pNew.angleTo(d) < 0.036)
-          && Math.abs(pNew.dot(this.riverN)) > 0.028;
-        if (!wet) {
-          p.copy(pNew);
-          f.applyAxisAngle(axis, ang);
-          phase += ang * 95 * (run > 1 ? 1.2 : 1);
-        }
+        p.applyAxisAngle(axis, ang).normalize();
+        f.applyAxisAngle(axis, ang);
+        phase += ang * 95 * (run > 1 ? 1.2 : 1);
       } else {
         phase += dt * 1.2;
       }
