@@ -921,13 +921,15 @@ class Component extends DCLogic {
 
     const SKIES = {
       sunset: {
+        // Keep the total intensity near the night preset's 1.56. Much above
+        // that and the pale wall colours clip to flat white.
         stops: [[0, '#4d7fbe'], [0.34, '#8fadd8'], [0.58, '#e7bda8'], [0.8, '#f4a179'], [1, '#e8827e']],
-        fog: 0xeda98c, fogNear: 150, fogFar: 340,
-        hemiSky: 0xffdcc0, hemiGround: 0xa8bcd0, hemiInt: 0.95,
-        sunColor: 0xffd7ad, sunInt: 0.9, fillColor: 0xd9c4e6, fillInt: 0.3,
-        orbPos: [-250, 78, -330], orbSize: 40, orbColor: 0xfff0d2,
-        halo: ['rgba(255,236,196,.92)', 'rgba(250,176,126,.42)', 'rgba(240,150,130,0)'],
-        haloScale: 400, orbLightColor: 0xffc79a, orbLightInt: 0.55, stars: false
+        fog: 0xe39a80, fogNear: 130, fogFar: 300,
+        hemiSky: 0xffc49a, hemiGround: 0x8fa6c2, hemiInt: 0.5,
+        sunColor: 0xffb87e, sunInt: 0.52, fillColor: 0xc3addc, fillInt: 0.16,
+        orbPos: [-250, 78, -330], orbSize: 40, orbColor: 0xffe6b8,
+        halo: ['rgba(255,226,170,.9)', 'rgba(248,162,112,.4)', 'rgba(238,138,120,0)'],
+        haloScale: 400, orbLightColor: 0xffa871, orbLightInt: 0.3, stars: false
       },
       night: {
         stops: [[0, '#070d20'], [0.45, '#141d3f'], [0.78, '#2b2c50'], [1, '#4a3550']],
