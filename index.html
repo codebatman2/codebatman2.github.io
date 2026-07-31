@@ -1856,7 +1856,9 @@ class Component extends DCLogic {
         const d0 = slerpDir(a, b, t);
         const d1 = slerpDir(a, b, Math.min(t + step, 1 - margin + step));
         const fwd = d1.clone().sub(d0.clone().multiplyScalar(d0.dot(d1))).normalize();
-        const right = new THREE.Vector3().crossVectors(fwd, d0).normalize();
+        // up × forward = right: keeps the basis right-handed so the matrix is
+        // a rotation, not a reflection that flips sleepers onto their edges.
+        const right = new THREE.Vector3().crossVectors(d0, fwd).normalize();
         const seg = new THREE.Group();
         const sleeper = this.box(0.8, 0.07, 0.24, PALETTE.wood);
         seg.add(sleeper);
@@ -2088,8 +2090,9 @@ class Component extends DCLogic {
     const player = this.character();
     scene.add(player);
 
-    const spawn = offsetLatLon(10, -105, 0.42, Math.PI * 1.15);
-    let p = v3(spawn[0], spawn[1], 1);
+    // Spawn at the centroid of the three cities — the middle of our world —
+    // facing Toronto, stop one.
+    let p = cityDirs[0].clone().add(cityDirs[1]).add(cityDirs[2]).normalize();
     const target = v3(10, -105, 1);
     let f = target.clone().sub(p.clone().multiplyScalar(p.dot(target))).normalize();
     const face = f.clone();
