@@ -1847,6 +1847,38 @@ class Component extends DCLogic {
       });
     });
 
+    // Railway between the cities: great-circle track that starts outside
+    // each downtown and runs through the countryside only.
+    const slerpDir = (a, b, t) => {
+      const om = a.angleTo(b), so = Math.sin(om);
+      return a.clone().multiplyScalar(Math.sin((1 - t) * om) / so)
+        .add(b.clone().multiplyScalar(Math.sin(t * om) / so)).normalize();
+    };
+    [[0, 1], [1, 2], [0, 2]].forEach(pair => {
+      const a = cityDirs[pair[0]], b = cityDirs[pair[1]];
+      const om = a.angleTo(b);
+      const margin = 0.42 / om;
+      const step = 0.02 / om;
+      for (let t = margin; t <= 1 - margin; t += step) {
+        const d0 = slerpDir(a, b, t);
+        const d1 = slerpDir(a, b, Math.min(t + step, 1 - margin + step));
+        const fwd = d1.clone().sub(d0.clone().multiplyScalar(d0.dot(d1))).normalize();
+        const right = new THREE.Vector3().crossVectors(fwd, d0).normalize();
+        const seg = new THREE.Group();
+        const sleeper = this.box(0.8, 0.07, 0.24, PALETTE.wood);
+        seg.add(sleeper);
+        [-0.26, 0.26].forEach(x => {
+          const rail = this.box(0.07, 0.09, 0.95, PALETTE.slate);
+          rail.position.set(x, 0.06, 0);
+          seg.add(rail);
+        });
+        seg.position.copy(d0.clone().multiplyScalar(R + 0.31));
+        seg.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, d0.clone(), fwd));
+        globe.add(seg);
+        props.push({ dir: d0, r: 0.018 });
+      }
+    });
+
     // Conifers are the countryside between cities, so keep them out of downtown.
     for (let i = 0, placed = 0; i < 1600 && placed < 65; i++) {
       const t = landTiles[Math.floor(Math.random() * landTiles.length)];
@@ -1946,13 +1978,14 @@ class Component extends DCLogic {
     const SKIES = {
       sunset: {
         // Keep the total light near 1.5; much above and pale walls clip white.
-        stops: ['#4d7fbe', '#8fadd8', '#e7bda8', '#f4a179', '#e8827e'],
-        fog: 0xe39a80, fogNear: 130, fogFar: 300,
-        hemiSky: 0xffc49a, hemiGround: 0x8fa6c2, hemiInt: 0.5,
-        sunColor: 0xffb87e, sunInt: 0.52, fillColor: 0xc3addc, fillInt: 0.16,
-        orbPos: [-250, 78, -330], orbSize: 40, orbColor: 0xffe6b8,
-        halo: [[255, 226, 170, 0.9], [248, 162, 112, 0.4], [238, 138, 120, 0]],
-        haloScale: 400, orbLightColor: 0xffa871, orbLightInt: 0.3, starW: 0
+        // Deep indigo zenith through violet into a burning orange horizon.
+        stops: ['#3d5a94', '#8d7ab5', '#e89a7c', '#f77b52', '#ef5f6b'],
+        fog: 0xe98868, fogNear: 120, fogFar: 280,
+        hemiSky: 0xffab7a, hemiGround: 0x7d90b8, hemiInt: 0.5,
+        sunColor: 0xff9e5e, sunInt: 0.55, fillColor: 0xb593d8, fillInt: 0.16,
+        orbPos: [-250, 64, -330], orbSize: 46, orbColor: 0xffd089,
+        halo: [[255, 205, 130, 0.95], [246, 138, 92, 0.5], [236, 110, 110, 0]],
+        haloScale: 470, orbLightColor: 0xff9459, orbLightInt: 0.32, starW: 0
       },
       day: {
         stops: ['#3d7edb', '#6ba3e8', '#a7cdf2', '#d3e7fa', '#f0ead8'],
