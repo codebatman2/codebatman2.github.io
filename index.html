@@ -1452,27 +1452,31 @@ class Component extends DCLogic {
     // y=0, and its depth buries the seam with the terrain tiles below, so
     // ground-hugging pieces (track, stones, blankets) can't be swallowed.
     const PLOT = { park: PALETTE.leaf, runpath: PALETTE.leaf, house: PALETTE.leaf, boat: PALETTE.ocean };
-    const plate = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.3, 0.4, 10), this.mat(PLOT[kind] || PALETTE.paving));
+    // Big venues keep the full slab; compact ones get a tighter one so
+    // neighbouring plots on the ring read as separate lots, not one strip.
+    const wide = ['park', 'runpath', 'boat', 'station', 'bridge'].includes(kind);
+    const plate = new THREE.Mesh(new THREE.CylinderGeometry(wide ? 3.0 : 2.5, wide ? 3.3 : 2.8, 0.4, 10), this.mat(PLOT[kind] || PALETTE.paving));
     plate.position.y = -0.2;
     g.add(plate);
     g.add((builders[kind] || builders.house)());
-    // Wide venues push the sign clear of their own footprint; everything
-    // else uses the hut-era spot.
+    // Signs sit radially IN FRONT of their venue (+z faces the approach from
+    // the city centre), never sideways: on the tight venue ring a sideways
+    // sign lands beside the NEIGHBOURING venue and mislabels it.
     const SIGN_POS = {
-      station: [-3.4, 0, 2.2, 0.35],
-      bridge: [-3.3, 0, 1.6, 0.3],
-      storefronts: [-2.5, 0, 1.4, 0.25],
-      diner: [-2.6, 0, 1.3, 0.25],
-      boat: [-3.3, 0, 1.3, 0.3],
-      market: [-2.4, 0, 1.5, 0.25],
-      runpath: [-2.9, 0, 1.8, 0.3],
-      park: [-2.7, 0, 1.9, 0.3],
-      restaurant: [-2.2, 0, 1.4, 0.2],
-      burger: [-2.2, 0, 1.4, 0.2],
-      house: [-2.5, 0, 1.6, 0.25],
-      billboards: [-2.8, 0, 1.9, 0.3]
+      station: [-2.2, 0, 3.2, 0.15],
+      bridge: [0, 0, 2.7, 0],
+      storefronts: [-1.6, 0, 2.3, 0.12],
+      diner: [-1.9, 0, 2.3, 0.15],
+      boat: [-1.2, 0, 3.2, 0.1],
+      market: [-1.7, 0, 2.5, 0.12],
+      runpath: [-1.3, 0, 2.7, 0.1],
+      park: [-1.5, 0, 3.3, 0.12],
+      restaurant: [-1.6, 0, 2.5, 0.12],
+      burger: [-1.6, 0, 2.5, 0.12],
+      house: [-1.6, 0, 2.7, 0.12],
+      billboards: [-1.7, 0, 2.7, 0.12]
     };
-    const pos = SIGN_POS[kind] || [-1.9, 0, 1.1, 0];
+    const pos = SIGN_POS[kind] || [-1.5, 0, 2.4, 0.12];
     const sign = this.placeSign(name);
     sign.position.set(pos[0], pos[1], pos[2]);
     sign.rotation.y = pos[3];
