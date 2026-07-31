@@ -1634,6 +1634,22 @@ class Component extends DCLogic {
     return g;
   }
 
+  trafficLight() {
+    const g = new THREE.Group();
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 2.1, 5), this.mat(0x3f4448));
+    pole.position.y = 1.05; g.add(pole);
+    const arm = this.box(0.9, 0.06, 0.06, 0x3f4448);
+    arm.position.set(0.42, 2.05, 0); g.add(arm);
+    const head = this.box(0.22, 0.62, 0.18, 0x2f3336);
+    head.position.set(0.8, 1.78, 0); g.add(head);
+    [[0xd6503f, 0.98, 0.9], [0xf5c84f, 0.78, 0.35], [0x69c07a, 0.58, 0.35]].forEach(l => {
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.06, 7, 6), this.mat(l[0], { emissive: l[0], emissiveIntensity: l[2] }));
+      lamp.position.set(0.8, 1.2 + l[1], 0.1);
+      g.add(lamp);
+    });
+    return g;
+  }
+
   // New York: yellow cab
   taxi() {
     const g = new THREE.Group();
@@ -1813,7 +1829,7 @@ class Component extends DCLogic {
       newyork: [
         [() => this.brownstone(), 7, 0.026],
         [() => this.skyscraper(7 + Math.random() * 6), 5, 0.03],
-        [() => this.waterTower(), 3, 0.018],
+        [() => this.trafficLight(), 3, 0.015],
         [() => this.taxi(), 3, 0.018]
       ]
     };
