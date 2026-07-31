@@ -273,7 +273,7 @@ const VENUE_KIND = {
   home: 'house', bedrot: 'house',
   christmasmarket: 'market', pichai: 'restaurant', banquise: 'diner', lexpress: 'bistro',
   centralpark: 'park', dumbo: 'bridge', grandcentral: 'station', timessquare: 'billboards',
-  grandbanks: 'boat', apollobagel: 'bagelshop', django: 'bar', emily: 'burger'
+  grandbanks: 'boat', apollobagel: 'bagelshop', django: 'jazzbar', emily: 'burger'
 };
 
 const PALETTE = {
@@ -688,26 +688,66 @@ class Component extends DCLogic {
     return signGroup;
   }
 
-  // a regular house: what Home and Bed Rot Days actually are
+  // our home: two storeys, a porch, and a garden — where most of it happened
   hut(tint) {
     const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.7, 2.1), this.mat(PALETTE.cream));
-    body.position.y = 0.85; g.add(body);
-    const roof = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 1.65, 1.25, 4), this.mat(tint));
-    roof.position.y = 2.35; roof.rotation.y = Math.PI / 4; g.add(roof);
-    const door = new THREE.Mesh(new THREE.BoxGeometry(0.62, 1.05, 0.1), this.mat(PALETTE.wood));
-    door.position.set(0, 0.52, 1.08); g.add(door);
-    [-0.65, 0.65].forEach(x => {
-      const w = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.1), this.mat(PALETTE.blue, { shininess: 30 }));
-      w.position.set(x, 1.15, 1.08); g.add(w);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.9, 2.6, 2.5), this.mat(PALETTE.cream));
+    body.position.y = 1.3; g.add(body);
+    // gabled roof with an overhang
+    const roof = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 2.35, 1.35, 4), this.mat(tint));
+    roof.position.y = 3.28; roof.rotation.y = Math.PI / 4; g.add(roof);
+    // porch: deck, two posts, its own little roof
+    const deck = this.box(2.1, 0.14, 0.95, PALETTE.wood);
+    deck.position.set(0, 0.07, 1.7); g.add(deck);
+    [-0.85, 0.85].forEach(x => {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.3, 5), this.mat(0xfff6ee));
+      post.position.set(x, 0.79, 2.05); g.add(post);
     });
-    const chim = this.box(0.3, 0.7, 0.3, PALETTE.brick);
-    chim.position.set(0.65, 2.5, -0.4); g.add(chim);
+    const porchRoof = this.box(2.3, 0.12, 1.15, tint);
+    porchRoof.position.set(0, 1.5, 1.75); porchRoof.rotation.x = 0.14; g.add(porchRoof);
+    // door with warm sidelights
+    const door = this.box(0.62, 1.15, 0.1, PALETTE.wood);
+    door.position.set(0, 0.57, 1.28); g.add(door);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 5), this.mat(0xb08d57));
+    knob.position.set(0.2, 0.55, 1.35); g.add(knob);
+    [-0.5, 0.5].forEach(x => {
+      const sl = this.box(0.16, 0.9, 0.08, 0xffe9c4, { emissive: 0xffd98a, emissiveIntensity: 0.35 });
+      sl.position.set(x, 0.62, 1.28); g.add(sl);
+    });
+    // two floors of windows, flower boxes under the lower pair
+    [[-0.85, 0.85], [-0.85, 0.85]].forEach((xs, fl) => xs.forEach(x => {
+      const w = this.box(0.5, 0.55, 0.1, PALETTE.blue, { shininess: 30 });
+      w.position.set(x, fl ? 2.0 : 0.85, 1.28); g.add(w);
+      const frame = this.box(0.58, 0.06, 0.12, 0xfff6ee);
+      frame.position.set(x, fl ? 1.7 : 0.55, 1.28); g.add(frame);
+      if (!fl) {
+        const fb = this.flowerBox(0.55);
+        fb.position.set(x, 0.5, 1.36); g.add(fb);
+      }
+    }));
+    // round attic window in the gable
+    const attic = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.1, 10), this.mat(PALETTE.blue, { shininess: 30 }));
+    attic.rotation.x = Math.PI / 2; attic.position.set(0, 3.1, 1.26); g.add(attic);
+    const chim = this.box(0.36, 0.9, 0.36, PALETTE.brick);
+    chim.position.set(0.9, 3.5, -0.5); g.add(chim);
+    // garden: stepping stones out the front, bushes, a side tree
+    for (let i = 0; i < 3; i++) {
+      const st = this.box(0.45, 0.05, 0.35, PALETTE.paving);
+      st.position.set(0, 0.03, 2.35 + i * 0.5); g.add(st);
+    }
+    [[-1.3, 1.9], [1.3, 1.9], [-1.7, 0.4]].forEach(p => {
+      const b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.26, 0), this.mat(0x8fce9f));
+      b.position.set(p[0], 0.24, p[1]); g.add(b);
+    });
+    const fp = this.flowerPatch();
+    fp.position.set(1.6, 0, 1.2); g.add(fp);
+    const t = this.roundTree(0.8);
+    t.position.set(-1.95, 0, -0.7); g.add(t);
     return g;
   }
 
   // striped awning over the door, the restaurant/café/shop tell
-  awning(tint, w, z) {
+  awning(tint, w, z, y) {
     const g = new THREE.Group();
     const n = 5;
     for (let i = 0; i < n; i++) {
@@ -715,7 +755,7 @@ class Component extends DCLogic {
       seg.position.x = -w / 2 + (i + 0.5) * (w / n);
       g.add(seg);
     }
-    g.position.set(0, 1.62, z); g.rotation.x = 0.22;
+    g.position.set(0, y === undefined ? 1.62 : y, z); g.rotation.x = 0.22;
     return g;
   }
 
@@ -848,7 +888,8 @@ class Component extends DCLogic {
     win.position.set(0.1, 0.85, 0.93); g.add(win);
     const door = this.box(0.5, 1.05, 0.1, PALETTE.wood);
     door.position.set(-0.72, 0.52, 0.93); g.add(door);
-    g.add(this.awning(tint, 2.2, 1.2));
+    // sits below the roofline overhang instead of slicing through it
+    g.add(this.awning(tint, 2.2, 1.25, 1.42));
     return g;
   }
 
@@ -919,29 +960,80 @@ class Component extends DCLogic {
 
   icecreamShop(tint) {
     const g = this.shop(tint);
+    // cone sits in a little cup stand on the roof, not hovering
+    const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.22, 0.4, 8), this.mat(0xfff6ee));
+    stand.position.y = 2.0; g.add(stand);
     const cone = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.9, 7), this.mat(0xe8b87f));
-    cone.rotation.x = Math.PI; cone.position.y = 2.4; g.add(cone);
+    cone.rotation.x = Math.PI; cone.position.y = 2.55; g.add(cone);
     const scoop = new THREE.Mesh(new THREE.SphereGeometry(0.34, 9, 7), this.mat(PALETTE.pink));
-    scoop.position.y = 3.0; g.add(scoop);
+    scoop.position.y = 3.15; g.add(scoop);
     const scoop2 = new THREE.Mesh(new THREE.SphereGeometry(0.28, 9, 7), this.mat(0xfff6ee));
-    scoop2.position.y = 3.45; g.add(scoop2);
+    scoop2.position.y = 3.6; g.add(scoop2);
+    const cherry = new THREE.Mesh(new THREE.SphereGeometry(0.09, 7, 6), this.mat(0xd6503f));
+    cherry.position.y = 3.9; g.add(cherry);
     return g;
   }
 
   barVenue(tint) {
     const g = new THREE.Group();
-    const body = this.box(2.3, 2.0, 1.9, 0x6e5a6e);
-    body.position.y = 1.0; g.add(body);
-    const marquee = this.box(1.7, 0.5, 0.14, 0xfff2c8, { emissive: 0xffe2a0, emissiveIntensity: 0.6 });
-    marquee.position.set(0, 1.55, 1.0); g.add(marquee);
+    const body = this.box(2.3, 2.2, 1.9, 0x6e5a6e);
+    body.position.y = 1.1; g.add(body);
+    const trim = this.box(2.45, 0.16, 2.05, 0x4a3c4a);
+    trim.position.y = 2.25; g.add(trim);
+    // lit marquee over a recessed doorway, carriage lamps either side
+    const marquee = this.box(1.7, 0.5, 0.18, 0xfff2c8, { emissive: 0xffe2a0, emissiveIntensity: 0.6 });
+    marquee.position.set(0, 1.68, 1.0); g.add(marquee);
     const door = this.box(0.6, 1.1, 0.1, 0x4a3c4a);
     door.position.set(0, 0.55, 0.98); g.add(door);
-    [-0.9, 0.9].forEach(x => {
-      const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.5, 6), this.mat(tint));
-      stool.position.set(x, 0.25, 1.35); g.add(stool);
+    [-0.5, 0.5].forEach(x => {
+      const bracket = this.box(0.06, 0.06, 0.2, 0x3c3936);
+      bracket.position.set(x, 1.3, 1.05); g.add(bracket);
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.1, 7, 6), this.mat(0xfff2c8, { emissive: 0xffd98a, emissiveIntensity: 0.85 }));
+      lamp.position.set(x, 1.18, 1.12); g.add(lamp);
     });
-    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 7, 6), this.mat(0xfff2c8, { emissive: 0xffd98a, emissiveIntensity: 0.8 }));
-    lamp.position.set(0.95, 1.9, 1.0); g.add(lamp);
+    // warm glowing windows: somebody's always inside
+    [-0.85, 0.85].forEach(x => {
+      const w = this.box(0.5, 0.6, 0.1, 0xffe9c4, { emissive: 0xffca70, emissiveIntensity: 0.5 });
+      w.position.set(x, 1.15, 0.98); g.add(w);
+    });
+    // sidewalk: stools at a ledge, velvet rope, string lights overhead
+    [-0.95, -0.55].forEach(x => {
+      const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.11, 0.5, 6), this.mat(tint));
+      stool.position.set(x, 0.25, 1.4); g.add(stool);
+    });
+    const ledge = this.box(0.95, 0.06, 0.25, PALETTE.wood);
+    ledge.position.set(-0.75, 0.62, 1.35); g.add(ledge);
+    [0.55, 1.05].forEach(x => {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.6, 5), this.mat(0xb08d57));
+      post.position.set(x, 0.3, 1.45); g.add(post);
+    });
+    const rope = this.box(0.5, 0.05, 0.05, 0x9e3b4d);
+    rope.position.set(0.8, 0.55, 1.45); g.add(rope);
+    const lights = this.stringLights(2.2, 2.0);
+    lights.position.set(0, 0, 1.55); g.add(lights);
+    return g;
+  }
+
+  // The Django: the bar dressed for jazz, a glowing note on the roof
+  jazzBar(tint) {
+    const g = this.barVenue(tint);
+    const note = new THREE.Group();
+    // beamed pair of eighth notes
+    [[-0.32, 0], [0.32, 0.1]].forEach(cfg => {
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), this.mat(0xfff2c8, { emissive: 0xffe2a0, emissiveIntensity: 0.7 }));
+      head.scale.y = 0.75;
+      head.position.set(cfg[0], cfg[1], 0);
+      note.add(head);
+      const stem = this.box(0.05, 0.85, 0.05, 0xfff2c8, { emissive: 0xffe2a0, emissiveIntensity: 0.7 });
+      stem.position.set(cfg[0] + 0.13, cfg[1] + 0.42, 0);
+      note.add(stem);
+    });
+    const beam = this.box(0.75, 0.12, 0.06, 0xfff2c8, { emissive: 0xffe2a0, emissiveIntensity: 0.7 });
+    beam.position.set(0.13, 0.9, 0); beam.rotation.z = 0.15;
+    note.add(beam);
+    note.position.y = 2.75;
+    note.rotation.y = 0.2;
+    g.add(note);
     return g;
   }
 
@@ -1098,6 +1190,27 @@ class Component extends DCLogic {
     }
     const sign = this.box(1.5, 0.45, 0.14, 0xfff2c8, { emissive: 0xffb36b, emissiveIntensity: 0.65 });
     sign.position.set(0, 1.75, 0.4); g.add(sign);
+    // the poutine itself, roof-mounted: bowl, fries, gravy, squeaky curds
+    const pt = new THREE.Group();
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.38, 0.42, 10), this.mat(0xd6503f));
+    bowl.position.y = 0.21; pt.add(bowl);
+    const gravy = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.1, 10), this.mat(0x8a5a3c));
+    gravy.position.y = 0.44; pt.add(gravy);
+    for (let i = 0; i < 8; i++) {
+      const a = i * 0.82;
+      const fry = this.box(0.09, 0.55, 0.09, 0xf0c25e);
+      fry.position.set(Math.cos(a) * 0.3, 0.65, Math.sin(a) * 0.3);
+      fry.rotation.set(Math.cos(a) * 0.45, 0, Math.sin(a) * 0.45);
+      pt.add(fry);
+    }
+    for (let i = 0; i < 5; i++) {
+      const a = i * 1.3 + 0.5;
+      const curd = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 5), this.mat(0xfff6ee));
+      curd.position.set(Math.cos(a) * 0.26, 0.55, Math.sin(a) * 0.26);
+      pt.add(curd);
+    }
+    pt.position.set(0, 1.43, -0.3);
+    g.add(pt);
     return g;
   }
 
@@ -1216,17 +1329,76 @@ class Component extends DCLogic {
   }
 
   billboards() {
+    // Times Square as a bowtie corner: three towers plastered in glowing
+    // screens at different scales and angles, the red TKTS steps at street
+    // level, a crowd milling in front.
     const g = new THREE.Group();
-    const tower = this.box(1.6, 4.6, 1.6, 0x4a4642);
-    tower.position.y = 2.3; g.add(tower);
-    const cols = [0xf6bccd, 0x9fd8e8, 0xf7dcae, 0xb8e6c8, 0xe8a8c8];
+    const cols = [0xf6bccd, 0x9fd8e8, 0xf7dcae, 0xb8e6c8, 0xe8a8c8, 0xff9e9e];
+    const screen = (w, h, c, i) => this.box(w, h, 0.12, c, { emissive: c, emissiveIntensity: i === undefined ? 0.6 : i });
+
+    // main tower with the stacked wrap of screens
+    const t1 = new THREE.Group();
+    const b1 = this.box(1.7, 5.4, 1.7, 0x3f3b42);
+    b1.position.y = 2.7; t1.add(b1);
     for (let i = 0; i < 5; i++) {
-      const b = this.box(1.75, 0.65, 0.14, cols[i], { emissive: cols[i], emissiveIntensity: 0.55 });
-      b.position.set(0, 0.85 + i * 0.78, 0.85 + (i % 2) * 0.06);
-      g.add(b);
+      const s = screen(1.85, 0.72, cols[i % cols.length]);
+      s.position.set(0, 1.1 + i * 0.86, 0.88);
+      t1.add(s);
     }
-    const side = this.box(0.14, 1.4, 1.3, 0xffe2a0, { emissive: 0xffd98a, emissiveIntensity: 0.5 });
-    side.position.set(0.88, 2.4, 0); g.add(side);
+    // giant vertical board up the corner
+    const vert = screen(0.7, 3.2, 0xffe2a0, 0.55);
+    vert.rotation.y = Math.PI / 2;
+    vert.position.set(0.88, 3.1, 0.3);
+    t1.add(vert);
+    // news zipper wrapping the base
+    const zip = screen(1.9, 0.22, 0x9fd8e8, 0.85);
+    zip.position.set(0, 0.55, 0.9); t1.add(zip);
+    const zip2 = screen(0.22, 0.22, 0x9fd8e8, 0.85);
+    zip2.rotation.y = Math.PI / 4; zip2.position.set(0.93, 0.55, 0.87); t1.add(zip2);
+    t1.position.set(-0.9, 0, -0.6);
+    g.add(t1);
+
+    // second tower, angled toward the square, one huge curved-feel screen
+    const t2 = new THREE.Group();
+    const b2 = this.box(1.4, 4.2, 1.4, 0x46424a);
+    b2.position.y = 2.1; t2.add(b2);
+    const big = screen(1.55, 2.1, 0xe8a8c8, 0.55);
+    big.position.set(0, 2.6, 0.73); t2.add(big);
+    const bigSplit = screen(1.55, 0.5, 0xb8e6c8, 0.7);
+    bigSplit.position.set(0, 1.35, 0.73); t2.add(bigSplit);
+    t2.rotation.y = -0.5;
+    t2.position.set(1.35, 0, -0.9);
+    g.add(t2);
+
+    // low third building so the screens read at street level too
+    const t3 = new THREE.Group();
+    const b3 = this.box(1.3, 2.4, 1.2, 0x3f3b42);
+    b3.position.y = 1.2; t3.add(b3);
+    const s3 = screen(1.4, 1.0, 0xf7dcae, 0.65);
+    s3.position.set(0, 1.6, 0.63); t3.add(s3);
+    const s4 = screen(1.4, 0.5, 0xff9e9e, 0.7);
+    s4.position.set(0, 0.7, 0.63); t3.add(s4);
+    t3.rotation.y = 0.45;
+    t3.position.set(-1.6, 0, 1.15);
+    g.add(t3);
+
+    // the red TKTS steps, glowing underneath
+    for (let i = 0; i < 4; i++) {
+      const step = this.box(1.5 - i * 0.12, 0.16, 0.5, 0xd6503f, { emissive: 0xa02030, emissiveIntensity: 0.35 });
+      step.position.set(0.7, 0.08 + i * 0.16, 0.6 - i * 0.3);
+      g.add(step);
+    }
+    // crowd: little heads bobbing around the square
+    for (let i = 0; i < 7; i++) {
+      const a = i * 0.9;
+      const person = new THREE.Group();
+      const bodyP = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.28, 5), this.mat(cols[i % cols.length]));
+      bodyP.position.y = 0.14; person.add(bodyP);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 5), this.mat(0xf2d3b8));
+      head.position.y = 0.36; person.add(head);
+      person.position.set(Math.cos(a) * (0.9 + (i % 3) * 0.3) + 0.2, 0, Math.sin(a) * 0.8 + 1.3);
+      g.add(person);
+    }
     return g;
   }
 
@@ -1263,6 +1435,7 @@ class Component extends DCLogic {
       sandwich: () => this.sandwichShop(tint),
       burger: () => this.burgerJoint(tint),
       bar: () => this.barVenue(tint),
+      jazzbar: () => this.jazzBar(tint),
       storefronts: () => this.storefronts(),
       park: () => this.parkVenue(),
       runpath: () => this.runPath(),
@@ -1287,7 +1460,9 @@ class Component extends DCLogic {
       runpath: [-2.9, 0, 1.8, 0.3],
       park: [-2.7, 0, 1.9, 0.3],
       restaurant: [-2.2, 0, 1.4, 0.2],
-      burger: [-2.2, 0, 1.4, 0.2]
+      burger: [-2.2, 0, 1.4, 0.2],
+      house: [-2.5, 0, 1.6, 0.25],
+      billboards: [-2.8, 0, 1.9, 0.3]
     };
     const pos = SIGN_POS[kind] || [-1.9, 0, 1.1, 0];
     const sign = this.placeSign(name);
