@@ -268,11 +268,23 @@ PANELS[NEXT.id] = {
   places: NEXT.places, hasPhotos: false, photoTitle: '', slots: []
 };
 
+// What each place renders as on the globe. Slugs not listed fall back to a
+// plain house.
+const VENUE_KIND = {
+  ossington: 'storefronts', liliana: 'restaurant', laolao: 'bar', alfies: 'shop',
+  goodbehaviour: 'icecream', milou: 'cafe', riverdale: 'park', runs: 'runpath',
+  home: 'house', bedrot: 'house',
+  christmasmarket: 'market', pichai: 'restaurant', banquise: 'diner', lexpress: 'bistro',
+  centralpark: 'park', dumbo: 'bridge', grandcentral: 'station', timessquare: 'billboards',
+  grandbanks: 'boat', apollobagel: 'shop', django: 'bar', emily: 'restaurant'
+};
+
 const PALETTE = {
   ocean: 0x9ecfe2, land: 0xaddcb8, land2: 0xc2e6c4, land3: 0x99d5ae,
   limestone: 0xf2e7d8, stone: 0xdfd6cd, concrete: 0xcfd3d8, glass: 0x9fbfd4,
   cream: 0xfff3ea, pink: 0xf6bccd, rose: 0xdd8ba3, blue: 0xbcd9ea, sand: 0xf7dcae,
-  leaf: 0x7cc294, trunk: 0xc09a7c, wood: 0xb98a63, slate: 0x8d93a8, copper: 0x9fc4b4
+  leaf: 0x7cc294, trunk: 0xc09a7c, wood: 0xb98a63, slate: 0x8d93a8, copper: 0x9fc4b4,
+  asphalt: 0xb9bec6, paving: 0xd2d5d9, kerb: 0xc7c3bd, brick: 0xb8705a, greystone: 0xc6c2bb
 };
 
 function offsetLatLon(lat, lon, angle, bearing) {
@@ -664,8 +676,23 @@ class Component extends DCLogic {
     return g;
   }
 
-  // photo hut: a little cabin with a hanging sign and a framed picture out front
-  hut(tint, name) {
+  // hanging name sign on two posts, shared by every venue
+  placeSign(name) {
+    const signGroup = new THREE.Group();
+    [-0.75, 0.75].forEach(x => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.5, 5), this.mat(PALETTE.wood));
+      p.position.set(x, 1.25, 0); signGroup.add(p);
+    });
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.1, 0.1), this.mat(PALETTE.wood));
+    bar.position.y = 2.45; signGroup.add(bar);
+    const board = this.signBoard(name, 1.85);
+    board.position.y = 1.85;
+    signGroup.add(board);
+    return signGroup;
+  }
+
+  // a regular house: what Home and Bed Rot Days actually are
+  hut(tint) {
     const g = new THREE.Group();
     const body = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.7, 2.1), this.mat(PALETTE.cream));
     body.position.y = 0.85; g.add(body);
@@ -677,39 +704,339 @@ class Component extends DCLogic {
       const w = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 0.1), this.mat(PALETTE.blue, { shininess: 30 }));
       w.position.set(x, 1.15, 1.08); g.add(w);
     });
-    // awning
-    const awn = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 0.8), this.mat(tint));
-    awn.position.set(0, 1.62, 1.45); awn.rotation.x = 0.22; g.add(awn);
-    // easel with a framed photo of us
-    const easel = new THREE.Group();
-    [-0.42, 0.42].forEach(x => {
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 1.5, 5), this.mat(PALETTE.wood));
-      leg.position.set(x, 0.75, 0); leg.rotation.z = x > 0 ? -0.1 : 0.1; easel.add(leg);
+    const chim = this.box(0.3, 0.7, 0.3, PALETTE.brick);
+    chim.position.set(0.65, 2.5, -0.4); g.add(chim);
+    return g;
+  }
+
+  // striped awning over the door, the restaurant/café/shop tell
+  awning(tint, w, z) {
+    const g = new THREE.Group();
+    const n = 5;
+    for (let i = 0; i < n; i++) {
+      const seg = this.box(w / n, 0.1, 0.8, i % 2 ? 0xfff6ee : tint);
+      seg.position.x = -w / 2 + (i + 0.5) * (w / n);
+      g.add(seg);
+    }
+    g.position.set(0, 1.62, z); g.rotation.x = 0.22;
+    return g;
+  }
+
+  patioTable(parasolTint) {
+    const g = new THREE.Group();
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.55, 5), this.mat(PALETTE.wood));
+    leg.position.y = 0.28; g.add(leg);
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.07, 8), this.mat(PALETTE.cream));
+    top.position.y = 0.58; g.add(top);
+    if (parasolTint) {
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.0, 4), this.mat(PALETTE.wood));
+      pole.position.y = 1.05; g.add(pole);
+      const um = new THREE.Mesh(new THREE.ConeGeometry(0.62, 0.34, 7), this.mat(parasolTint));
+      um.position.y = 1.55; g.add(um);
+    }
+    return g;
+  }
+
+  restaurant(tint) {
+    const g = new THREE.Group();
+    const body = this.box(2.4, 1.9, 2.0, PALETTE.cream);
+    body.position.y = 0.95; g.add(body);
+    const roofline = this.box(2.55, 0.18, 2.15, tint);
+    roofline.position.y = 1.95; g.add(roofline);
+    const door = this.box(0.6, 1.1, 0.1, PALETTE.wood);
+    door.position.set(-0.6, 0.55, 1.03); g.add(door);
+    const win = this.box(1.0, 0.8, 0.1, PALETTE.blue, { shininess: 30 });
+    win.position.set(0.5, 0.95, 1.03); g.add(win);
+    g.add(this.awning(tint, 2.5, 1.35));
+    const t1 = this.patioTable(tint); t1.position.set(1.7, 0, 1.1); g.add(t1);
+    const t2 = this.patioTable(null); t2.position.set(2.1, 0, -0.2); g.add(t2);
+    return g;
+  }
+
+  cafe(tint) {
+    const g = this.restaurant(tint);
+    g.scale.setScalar(0.85);
+    return g;
+  }
+
+  shop(tint) {
+    const g = new THREE.Group();
+    const body = this.box(2.1, 1.7, 1.8, PALETTE.cream);
+    body.position.y = 0.85; g.add(body);
+    const roofline = this.box(2.25, 0.16, 1.95, tint);
+    roofline.position.y = 1.75; g.add(roofline);
+    const win = this.box(1.5, 0.85, 0.1, PALETTE.blue, { shininess: 30 });
+    win.position.set(0.1, 0.85, 0.93); g.add(win);
+    const door = this.box(0.5, 1.05, 0.1, PALETTE.wood);
+    door.position.set(-0.72, 0.52, 0.93); g.add(door);
+    g.add(this.awning(tint, 2.2, 1.2));
+    return g;
+  }
+
+  icecreamShop(tint) {
+    const g = this.shop(tint);
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.9, 7), this.mat(0xe8b87f));
+    cone.rotation.x = Math.PI; cone.position.y = 2.4; g.add(cone);
+    const scoop = new THREE.Mesh(new THREE.SphereGeometry(0.34, 9, 7), this.mat(PALETTE.pink));
+    scoop.position.y = 3.0; g.add(scoop);
+    const scoop2 = new THREE.Mesh(new THREE.SphereGeometry(0.28, 9, 7), this.mat(0xfff6ee));
+    scoop2.position.y = 3.45; g.add(scoop2);
+    return g;
+  }
+
+  barVenue(tint) {
+    const g = new THREE.Group();
+    const body = this.box(2.3, 2.0, 1.9, 0x6e5a6e);
+    body.position.y = 1.0; g.add(body);
+    const marquee = this.box(1.7, 0.5, 0.14, 0xfff2c8, { emissive: 0xffe2a0, emissiveIntensity: 0.6 });
+    marquee.position.set(0, 1.55, 1.0); g.add(marquee);
+    const door = this.box(0.6, 1.1, 0.1, 0x4a3c4a);
+    door.position.set(0, 0.55, 0.98); g.add(door);
+    [-0.9, 0.9].forEach(x => {
+      const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.5, 6), this.mat(tint));
+      stool.position.set(x, 0.25, 1.35); g.add(stool);
     });
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.15, 0.1), this.mat(PALETTE.wood));
-    frame.position.y = 1.35; easel.add(frame);
-    const photo = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.9, 0.12), this.mat(PALETTE.pink, { shininess: 20 }));
-    photo.position.set(0, 1.35, 0.03); easel.add(photo);
-    [[-0.22, 1.42], [0.22, 1.42]].forEach(h => {
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 6), this.mat(0xfff0e4));
-      head.position.set(h[0], h[1], 0.1); easel.add(head);
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 7, 6), this.mat(0xfff2c8, { emissive: 0xffd98a, emissiveIntensity: 0.8 }));
+    lamp.position.set(0.95, 1.9, 1.0); g.add(lamp);
+    return g;
+  }
+
+  storefronts() {
+    const g = new THREE.Group();
+    [[-1.15, 0xf6bccd, 1.9], [0, 0xbcd9ea, 2.2], [1.15, 0xf7dcae, 2.0]].forEach(cfg => {
+      const s = new THREE.Group();
+      const body = this.box(1.05, cfg[2], 1.7, PALETTE.cream);
+      body.position.y = cfg[2] / 2; s.add(body);
+      const top = this.box(1.15, 0.14, 1.8, cfg[1]);
+      top.position.y = cfg[2]; s.add(top);
+      const win = this.box(0.7, 0.6, 0.1, PALETTE.blue, { shininess: 30 });
+      win.position.set(0, 0.8, 0.88); s.add(win);
+      const awn = this.box(1.0, 0.08, 0.5, cfg[1]);
+      awn.position.set(0, 1.25, 1.05); awn.rotation.x = 0.25; s.add(awn);
+      s.position.x = cfg[0];
+      g.add(s);
     });
-    easel.position.set(1.85, 0, 0.9);
-    easel.rotation.y = -0.5;
-    g.add(easel);
-    // hanging sign on two posts
-    const signGroup = new THREE.Group();
-    [-0.75, 0.75].forEach(x => {
-      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.5, 5), this.mat(PALETTE.wood));
-      p.position.set(x, 1.25, 0); signGroup.add(p);
+    return g;
+  }
+
+  parkVenue() {
+    const g = new THREE.Group();
+    const mound = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.7, 0.3, 8), this.mat(PALETTE.leaf));
+    mound.position.y = 0.15; g.add(mound);
+    [[-1.2, -0.6], [1.1, -0.9], [0.4, 0.9], [-0.6, 1.1]].forEach(p => {
+      const t = this.roundTree(0.7 + Math.random() * 0.3);
+      t.position.set(p[0], 0.3, p[1]); g.add(t);
     });
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.1, 0.1), this.mat(PALETTE.wood));
-    bar.position.y = 2.45; signGroup.add(bar);
-    const board = this.signBoard(name, 1.85);
-    board.position.y = 1.85;
-    signGroup.add(board);
-    signGroup.position.set(-1.9, 0, 1.1);
-    g.add(signGroup);
+    const bench = new THREE.Group();
+    const seat = this.box(0.9, 0.08, 0.3, PALETTE.wood);
+    seat.position.y = 0.35; bench.add(seat);
+    const back = this.box(0.9, 0.26, 0.07, PALETTE.wood);
+    back.position.set(0, 0.55, -0.13); bench.add(back);
+    [-0.35, 0.35].forEach(x => {
+      const l = this.box(0.07, 0.35, 0.26, 0x6b5b4a);
+      l.position.set(x, 0.17, 0); bench.add(l);
+    });
+    bench.position.set(1.3, 0.3, 0.4); bench.rotation.y = -0.7; g.add(bench);
+    for (let i = 0; i < 4; i++) {
+      const stone = this.box(0.5, 0.06, 0.4, PALETTE.paving);
+      stone.position.set(-0.2 + i * 0.42, 0.31, -0.4 - i * 0.28);
+      g.add(stone);
+    }
+    return g;
+  }
+
+  runPath() {
+    const g = new THREE.Group();
+    for (let i = 0; i < 6; i++) {
+      const a = -0.9 + i * 0.38;
+      const seg = this.box(0.85, 0.06, 0.55, 0xd8a48a);
+      seg.position.set(Math.sin(a) * 1.6, 0.03, a * 1.4);
+      seg.rotation.y = -a * 0.5;
+      g.add(seg);
+    }
+    const arch = new THREE.Group();
+    [-0.7, 0.7].forEach(x => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.9, 5), this.mat(PALETTE.rose));
+      p.position.set(x, 0.95, 0); arch.add(p);
+    });
+    const bar = this.box(1.6, 0.12, 0.12, PALETTE.rose);
+    bar.position.y = 1.9; arch.add(bar);
+    arch.position.set(-0.1, 0, -1.3); arch.rotation.y = 0.35; g.add(arch);
+    const fount = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.75, 6), this.mat(PALETTE.slate));
+    fount.position.set(1.6, 0.38, 0.9); g.add(fount);
+    return g;
+  }
+
+  marketStalls() {
+    const g = new THREE.Group();
+    [[-1.2, 0xd6503f], [0.1, 0x3f7d54], [1.4, 0xd6503f]].forEach((cfg, i) => {
+      const s = new THREE.Group();
+      const body = this.box(1.1, 0.9, 1.0, PALETTE.wood);
+      body.position.y = 0.45; s.add(body);
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(0.95, 0.6, 4), this.mat(cfg[1]));
+      roof.position.y = 1.2; roof.rotation.y = Math.PI / 4; s.add(roof);
+      const counter = this.box(1.1, 0.1, 0.3, 0xfff6ee);
+      counter.position.set(0, 0.75, 0.6); s.add(counter);
+      s.position.set(cfg[0], 0, (i % 2) * 0.5 - 0.2);
+      g.add(s);
+    });
+    const tree = this.tree(1.3);
+    tree.position.set(0.2, 0, -1.4); g.add(tree);
+    for (let i = 0; i < 5; i++) {
+      const b = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 5), this.mat(0xfff2c8, { emissive: 0xffd98a, emissiveIntensity: 0.9 }));
+      b.position.set(0.2 + Math.sin(i * 2.1) * 0.45, 0.9 + i * 0.28, -1.4 + Math.cos(i * 2.1) * 0.45);
+      g.add(b);
+    }
+    return g;
+  }
+
+  diner() {
+    const g = new THREE.Group();
+    const body = this.box(3.4, 1.3, 1.7, 0xe9e4de);
+    body.position.y = 0.65; g.add(body);
+    const trim = this.box(3.5, 0.16, 1.8, 0xd6503f);
+    trim.position.y = 1.35; g.add(trim);
+    for (let x = -1.2; x <= 1.2; x += 0.8) {
+      const w = this.box(0.55, 0.55, 0.1, PALETTE.blue, { shininess: 30 });
+      w.position.set(x, 0.75, 0.88); g.add(w);
+    }
+    const sign = this.box(1.5, 0.45, 0.14, 0xfff2c8, { emissive: 0xffb36b, emissiveIntensity: 0.65 });
+    sign.position.set(0, 1.75, 0.4); g.add(sign);
+    return g;
+  }
+
+  bistro() {
+    const g = new THREE.Group();
+    const body = this.box(2.3, 2.2, 1.9, 0x8a3b34);
+    body.position.y = 1.1; g.add(body);
+    const win = this.box(1.6, 1.0, 0.1, 0xf4e9d8, { shininess: 30 });
+    win.position.set(0, 1.15, 0.98); g.add(win);
+    g.add(this.awning(0x8a3b34, 2.4, 1.3));
+    const railG = new THREE.Group();
+    [-0.9, -0.3, 0.3, 0.9].forEach(x => {
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.55, 4), this.mat(0x3c3936));
+      p.position.set(x, 0.28, 0); railG.add(p);
+    });
+    const rail = this.box(1.95, 0.06, 0.06, 0x3c3936);
+    rail.position.y = 0.55; railG.add(rail);
+    railG.position.set(0, 0, 1.5); g.add(railG);
+    const t = this.patioTable(null); t.position.set(1.6, 0, 1.2); g.add(t);
+    return g;
+  }
+
+  station() {
+    const g = new THREE.Group();
+    const body = this.box(4.2, 2.6, 2.2, PALETTE.limestone);
+    body.position.y = 1.3; g.add(body);
+    [-1.3, 0, 1.3].forEach(x => {
+      const win = this.box(0.75, 1.3, 0.1, PALETTE.glass, { shininess: 40 });
+      win.position.set(x, 1.2, 1.13); g.add(win);
+      const arch = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.1, 10, 1, false, 0, Math.PI), this.mat(PALETTE.glass, { shininess: 40 }));
+      arch.rotation.x = Math.PI / 2;
+      arch.position.set(x, 1.85, 1.13); g.add(arch);
+    });
+    const cornice = this.box(4.5, 0.3, 2.4, PALETTE.stone);
+    cornice.position.y = 2.75; g.add(cornice);
+    const clockBase = this.box(0.8, 0.7, 0.3, PALETTE.stone);
+    clockBase.position.y = 3.25; g.add(clockBase);
+    const clock = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.1, 12), this.mat(0xfff6ee));
+    clock.rotation.x = Math.PI / 2; clock.position.set(0, 3.28, 0.18); g.add(clock);
+    return g;
+  }
+
+  bridgeVenue() {
+    const g = new THREE.Group();
+    const deck = this.box(6.4, 0.18, 0.9, PALETTE.stone);
+    deck.position.y = 1.5; g.add(deck);
+    [-1.8, 1.8].forEach(x => {
+      const tower = new THREE.Group();
+      const base = this.box(0.9, 2.9, 1.0, PALETTE.stone);
+      base.position.y = 1.45; tower.add(base);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.5, 0.6, 4), this.mat(PALETTE.stone));
+      top.position.y = 3.15; top.rotation.y = Math.PI / 4; tower.add(top);
+      tower.position.x = x;
+      g.add(tower);
+    });
+    // main cables: level between the towers, sloping down to the deck outside
+    // them. dy is the drop from tower top (3.0) to each span's outer end.
+    [[-3.1, -1.8, -1.3], [-1.8, 1.8, 0], [1.8, 3.1, 1.3]].forEach(span => {
+      const midX = (span[0] + span[1]) / 2;
+      const dx = span[1] - span[0], dy = span[2];
+      [0.35, -0.35].forEach(z => {
+        const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, Math.hypot(dx, dy), 4), this.mat(0x5a5650));
+        cable.position.set(midX, 3.0 - Math.abs(dy) / 2, z);
+        cable.rotation.z = Math.PI / 2 - Math.atan2(dy, dx);
+        g.add(cable);
+      });
+    });
+    // suspenders between the level cable (y 3.0) and the deck (y 1.5)
+    for (let x = -1.4; x <= 1.4; x += 0.7) {
+      const s = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.5, 3), this.mat(0x5a5650));
+      s.position.set(x, 2.25, 0.35); g.add(s);
+    }
+    return g;
+  }
+
+  billboards() {
+    const g = new THREE.Group();
+    const tower = this.box(1.6, 4.6, 1.6, 0x4a4642);
+    tower.position.y = 2.3; g.add(tower);
+    const cols = [0xf6bccd, 0x9fd8e8, 0xf7dcae, 0xb8e6c8, 0xe8a8c8];
+    for (let i = 0; i < 5; i++) {
+      const b = this.box(1.75, 0.65, 0.14, cols[i], { emissive: cols[i], emissiveIntensity: 0.55 });
+      b.position.set(0, 0.85 + i * 0.78, 0.85 + (i % 2) * 0.06);
+      g.add(b);
+    }
+    const side = this.box(0.14, 1.4, 1.3, 0xffe2a0, { emissive: 0xffd98a, emissiveIntensity: 0.5 });
+    side.position.set(0.88, 2.4, 0); g.add(side);
+    return g;
+  }
+
+  boat() {
+    const g = new THREE.Group();
+    const water = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 0.12, 10), this.mat(PALETTE.ocean, { shininess: 40 }));
+    water.position.y = 0.06; g.add(water);
+    const hull = this.box(3.0, 0.6, 1.1, 0x4a5a6e);
+    hull.position.y = 0.5; g.add(hull);
+    const bow = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.55, 1.1, 4), this.mat(0x4a5a6e));
+    bow.rotation.z = -Math.PI / 2; bow.position.set(1.9, 0.5, 0); g.add(bow);
+    const deckhouse = this.box(1.1, 0.5, 0.8, PALETTE.cream);
+    deckhouse.position.set(-0.6, 1.05, 0); g.add(deckhouse);
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 5), this.mat(PALETTE.wood));
+    mast.position.set(0.5, 2.0, 0); g.add(mast);
+    const boom = this.box(1.8, 0.07, 0.07, PALETTE.wood);
+    boom.position.set(-0.4, 1.1, 0); g.add(boom);
+    const t1 = this.patioTable(0xf6bccd); t1.position.set(-1.0, 0.8, 0); t1.scale.setScalar(0.6); g.add(t1);
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.1, 7, 6), this.mat(0xfff2c8, { emissive: 0xffd98a, emissiveIntensity: 0.8 }));
+    lamp.position.set(0.5, 3.35, 0); g.add(lamp);
+    return g;
+  }
+
+  // dispatch: every place renders as what it actually is
+  venue(kind, tint, name) {
+    const g = new THREE.Group();
+    const builders = {
+      house: () => this.hut(tint),
+      restaurant: () => this.restaurant(tint),
+      cafe: () => this.cafe(tint),
+      shop: () => this.shop(tint),
+      icecream: () => this.icecreamShop(tint),
+      bar: () => this.barVenue(tint),
+      storefronts: () => this.storefronts(),
+      park: () => this.parkVenue(),
+      runpath: () => this.runPath(),
+      market: () => this.marketStalls(),
+      diner: () => this.diner(),
+      bistro: () => this.bistro(),
+      station: () => this.station(),
+      bridge: () => this.bridgeVenue(),
+      billboards: () => this.billboards(),
+      boat: () => this.boat()
+    };
+    g.add((builders[kind] || builders.house)());
+    const sign = this.placeSign(name);
+    sign.position.set(-1.9, 0, 1.1);
+    g.add(sign);
     return g;
   }
 
@@ -720,6 +1047,166 @@ class Component extends DCLogic {
     const c = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.5, 6), this.mat(PALETTE.leaf));
     c.position.y = 1.3; g.add(c);
     g.scale.setScalar(scale);
+    return g;
+  }
+
+  // ── city kit ────────────────────────────────────────────────────────────
+  // Each city gets buildings drawn from what it actually looks like, so the
+  // three stops don't read as one repeated village.
+  box(w, h, d, color, opts) {
+    return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), this.mat(color, opts));
+  }
+
+  wheels(g, xs, z, r) {
+    xs.forEach(x => [-z, z].forEach(zz => {
+      const w = new THREE.Mesh(new THREE.CylinderGeometry(r, r, r * 0.7, 8), this.mat(0x3c3936));
+      w.rotation.x = Math.PI / 2;
+      w.position.set(x, r, zz);
+      g.add(w);
+    }));
+  }
+
+  // Toronto: the glass condo, which is most of the skyline
+  condoTower(h) {
+    const g = new THREE.Group();
+    const w = 1.5 + Math.random() * 0.7;
+    const body = this.box(w, h, w * 0.86, PALETTE.glass, { shininess: 40 });
+    body.position.y = h / 2; g.add(body);
+    for (let y = 1.3; y < h - 0.6; y += 1.6) {
+      const band = this.box(w * 1.05, 0.13, w * 0.9, 0xe2eef5);
+      band.position.y = y; g.add(band);
+    }
+    const cap = this.box(w * 0.55, 0.5, w * 0.48, PALETTE.concrete);
+    cap.position.y = h + 0.25; g.add(cap);
+    return g;
+  }
+
+  // Toronto: the red rocket
+  streetcar() {
+    const g = new THREE.Group();
+    const body = this.box(3.3, 0.95, 1.05, 0xd6503f);
+    body.position.y = 0.85; g.add(body);
+    const win = this.box(2.9, 0.4, 1.09, 0xcfe4f0, { shininess: 30 });
+    win.position.y = 1.05; g.add(win);
+    const roof = this.box(3.2, 0.16, 0.98, 0xe9e4de);
+    roof.position.y = 1.4; g.add(roof);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.1, 4), this.mat(0x4a4642));
+    pole.position.set(0.6, 1.9, 0); pole.rotation.z = -0.3; g.add(pole);
+    this.wheels(g, [-1.05, 1.05], 0.48, 0.22);
+    return g;
+  }
+
+  // Toronto and Montréal street tree: broadleaf, not a conifer
+  roundTree(scale) {
+    const g = new THREE.Group();
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 0.95, 5), this.mat(PALETTE.trunk));
+    t.position.y = 0.48; g.add(t);
+    const c = new THREE.Mesh(new THREE.IcosahedronGeometry(0.72, 0), this.mat(PALETTE.leaf));
+    c.position.y = 1.45; g.add(c);
+    g.scale.setScalar(scale);
+    return g;
+  }
+
+  // Montréal: greystone triplex with the outdoor spiral staircase
+  greystone() {
+    const g = new THREE.Group();
+    const body = this.box(2.5, 3.0, 2.1, PALETTE.greystone);
+    body.position.y = 1.5; g.add(body);
+    const roof = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.7, 0.85, 4), this.mat(0x77707a));
+    roof.position.y = 3.4; roof.rotation.y = Math.PI / 4; g.add(roof);
+    [1.05, 2.25].forEach(y => [-0.65, 0.65].forEach(x => {
+      const w = this.box(0.48, 0.72, 0.1, PALETTE.blue, { shininess: 30 });
+      w.position.set(x, y, 1.07); g.add(w);
+    }));
+    const stair = new THREE.Group();
+    for (let i = 0; i < 12; i++) {
+      const a = i * 0.42;
+      const step = this.box(0.72, 0.09, 0.3, 0x555b66);
+      step.position.set(Math.cos(a) * 0.46, 0.22 + i * 0.19, Math.sin(a) * 0.46);
+      step.rotation.y = -a;
+      stair.add(step);
+    }
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.5, 6), this.mat(0x555b66));
+    pole.position.y = 1.25; stair.add(pole);
+    stair.position.set(1.05, 0, 1.45);
+    g.add(stair);
+    return g;
+  }
+
+  // Montréal: copper steeple gone green
+  steeple() {
+    const g = new THREE.Group();
+    const nave = this.box(2.5, 2.1, 3.2, PALETTE.limestone);
+    nave.position.set(0, 1.05, 2.3); g.add(nave);
+    const tower = this.box(1.45, 4.8, 1.45, PALETTE.limestone);
+    tower.position.y = 2.4; g.add(tower);
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(1.05, 2.5, 4), this.mat(PALETTE.copper));
+    spire.position.y = 6.05; spire.rotation.y = Math.PI / 4; g.add(spire);
+    return g;
+  }
+
+  // New York: brownstone with a stoop
+  brownstone() {
+    const g = new THREE.Group();
+    const h = 3.9;
+    const body = this.box(2.1, h, 1.9, PALETTE.brick);
+    body.position.y = h / 2; g.add(body);
+    const cornice = this.box(2.35, 0.26, 2.15, 0x92543f);
+    cornice.position.y = h + 0.1; g.add(cornice);
+    [1.0, 2.05, 3.1].forEach(y => [-0.55, 0.55].forEach(x => {
+      const w = this.box(0.42, 0.7, 0.1, PALETTE.blue, { shininess: 30 });
+      w.position.set(x, y, 0.97); g.add(w);
+    }));
+    for (let i = 0; i < 5; i++) {
+      const st = this.box(0.95, 0.16, 0.28, PALETTE.stone);
+      st.position.set(0, 0.09 + i * 0.16, 1.3 + i * 0.2);
+      g.add(st);
+    }
+    return g;
+  }
+
+  // New York: setback tower wearing the rooftop water tank
+  skyscraper(h) {
+    const g = new THREE.Group();
+    let y = 0, w = 2.3;
+    for (let i = 0; i < 3; i++) {
+      const th = h / 3;
+      const seg = this.box(w, th, w, i % 2 ? PALETTE.limestone : PALETTE.concrete);
+      seg.position.y = y + th / 2; g.add(seg);
+      y += th; w *= 0.74;
+    }
+    const tank = this.waterTower();
+    tank.scale.setScalar(0.75);
+    tank.position.y = y;
+    g.add(tank);
+    return g;
+  }
+
+  waterTower() {
+    const g = new THREE.Group();
+    [[-0.28, -0.28], [0.28, -0.28], [-0.28, 0.28], [0.28, 0.28]].forEach(p => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.95, 4), this.mat(PALETTE.wood));
+      leg.position.set(p[0], 0.48, p[1]); g.add(leg);
+    });
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.0, 9), this.mat(0xa2764f));
+    tank.position.y = 1.45; g.add(tank);
+    const lid = new THREE.Mesh(new THREE.ConeGeometry(0.56, 0.42, 9), this.mat(0x7f5a3c));
+    lid.position.y = 2.15; g.add(lid);
+    return g;
+  }
+
+  // New York: yellow cab
+  taxi() {
+    const g = new THREE.Group();
+    const body = this.box(1.85, 0.48, 0.85, 0xf2c14a);
+    body.position.y = 0.44; g.add(body);
+    const cabin = this.box(0.95, 0.4, 0.8, 0xf7d670);
+    cabin.position.set(-0.1, 0.85, 0); g.add(cabin);
+    const win = this.box(0.97, 0.2, 0.83, 0xcfe4f0, { shininess: 30 });
+    win.position.set(-0.1, 0.9, 0); g.add(win);
+    const light = this.box(0.28, 0.12, 0.2, 0xfff2c8);
+    light.position.set(-0.1, 1.09, 0); g.add(light);
+    this.wheels(g, [-0.58, 0.58], 0.4, 0.17);
     return g;
   }
 
@@ -786,13 +1273,26 @@ class Component extends DCLogic {
       { lat: 46, lon: 120, rx: 30, ry: 22 }
     ];
     const landTiles = [];
+    // How far a point sits from the nearest city centre, in radians. The place
+    // huts ring their city at 0.30-0.36, so anything under ~0.42 is downtown.
+    const cityDirs = CITIES.map(c => v3(c.lat, c.lon, 1));
+    const cityDist = (la, lo) => {
+      const d = v3(la, lo, 1);
+      return cityDirs.reduce((m, cd) => Math.min(m, d.angleTo(cd)), 9);
+    };
     blobs.forEach(b => {
       for (let la = b.lat - b.ry; la <= b.lat + b.ry; la += 5.5) {
         for (let lo = b.lon - b.rx; lo <= b.lon + b.rx; lo += 5.5) {
           const dx = (lo - b.lon) / b.rx, dy = (la - b.lat) / b.ry;
           if (dx * dx + dy * dy > 0.95 + Math.sin(lo * 0.7) * 0.12) continue;
           const jl = la + (Math.random() - 0.5) * 2.2, jn = lo + (Math.random() - 0.5) * 2.2;
-          const col = [PALETTE.land, PALETTE.land2, PALETTE.land3][Math.floor(Math.random() * 3)];
+          // Ground turns to paving downtown and feathers back to grass, so the
+          // cities sit on streets instead of a field.
+          const cd = cityDist(jl, jn);
+          const paved = [PALETTE.asphalt, PALETTE.paving, PALETTE.kerb];
+          const green = [PALETTE.land, PALETTE.land2, PALETTE.land3];
+          const pool = cd < 0.40 ? paved : cd < 0.52 ? (Math.random() < 0.5 ? paved : green) : green;
+          const col = pool[Math.floor(Math.random() * 3)];
           const tile = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.4, 0.5, 6), this.mat(col));
           this.orient(tile, jl, jn, R + 0.05);
           tile.rotateY(Math.random() * Math.PI);
@@ -835,7 +1335,7 @@ class Component extends DCLogic {
         const c = offsetLatLon(city.lat, city.lon, dist, bearing);
         pl.lat = c[0]; pl.lon = c[1];
         const g = new THREE.Group();
-        g.add(this.hut([PALETTE.pink, PALETTE.blue, PALETTE.rose, 0xa9cfe4][i % 4], pl.name));
+        g.add(this.venue(VENUE_KIND[pl.slug], [PALETTE.pink, PALETTE.blue, PALETTE.rose, 0xa9cfe4][i % 4], pl.name));
         this.orient(g, pl.lat, pl.lon, R + 0.2);
         g.rotateY(-bearing + Math.PI);
         globe.add(g);
@@ -845,18 +1345,65 @@ class Component extends DCLogic {
 
     addLandmark(NEXT, this.signpost(), 1.6, 6.6);
 
-    const clearOf = (lat, lon) => {
+    // Props claim their own footprint so buildings don't grow through each
+    // other, and never sit on a hut or landmark the player walks up to.
+    const props = [];
+    const freeSpot = (lat, lon, r) => {
       const d = v3(lat, lon, 1);
-      return !this.stops.some(st => d.angleTo(st.dir) < (st.range + 0.03));
+      if (this.stops.some(st => d.angleTo(st.dir) < st.range + r)) return false;
+      if (props.some(s => d.angleTo(s.dir) < s.r + r)) return false;
+      return true;
     };
-    for (let i = 0, placed = 0; i < 1200 && placed < 65; i++) {
+    const clearOf = (lat, lon) => freeSpot(lat, lon, 0.03);
+
+    const CITY_KITS = {
+      toronto: [
+        [() => this.condoTower(6 + Math.random() * 6), 7, 0.03],
+        [() => this.streetcar(), 2, 0.03],
+        [() => this.roundTree(0.9 + Math.random() * 0.5), 9, 0.018]
+      ],
+      montreal: [
+        [() => this.greystone(), 8, 0.028],
+        [() => this.steeple(), 2, 0.03],
+        [() => this.roundTree(0.85 + Math.random() * 0.45), 8, 0.018]
+      ],
+      newyork: [
+        [() => this.brownstone(), 7, 0.026],
+        [() => this.skyscraper(7 + Math.random() * 6), 5, 0.03],
+        [() => this.waterTower(), 3, 0.018],
+        [() => this.taxi(), 3, 0.018]
+      ]
+    };
+
+    CITIES.forEach(city => {
+      (CITY_KITS[city.id] || []).forEach(kit => {
+        const make = kit[0], want = kit[1], rad = kit[2];
+        for (let n = 0, guard = 0; n < want && guard < 300; guard++) {
+          const bearing = Math.random() * Math.PI * 2;
+          const dist = 0.09 + Math.random() * 0.28;
+          const c = offsetLatLon(city.lat, city.lon, dist, bearing);
+          if (!freeSpot(c[0], c[1], rad)) continue;
+          const g = make();
+          this.orient(g, c[0], c[1], R + 0.2);
+          g.rotateY(Math.random() * Math.PI * 2);
+          globe.add(g);
+          props.push({ dir: v3(c[0], c[1], 1), r: rad });
+          n++;
+        }
+      });
+    });
+
+    // Conifers are the countryside between cities, so keep them out of downtown.
+    for (let i = 0, placed = 0; i < 1600 && placed < 65; i++) {
       const t = landTiles[Math.floor(Math.random() * landTiles.length)];
       const la = t[0] + (Math.random() - 0.5) * 4, lo = t[1] + (Math.random() - 0.5) * 4;
-      if (!clearOf(la, lo)) continue;
+      if (cityDist(la, lo) < 0.46) continue;
+      if (!freeSpot(la, lo, 0.02)) continue;
       const tr = this.tree(0.8 + Math.random() * 0.8);
       this.orient(tr, la, lo, R + 0.2);
       tr.rotateY(Math.random() * Math.PI);
       globe.add(tr);
+      props.push({ dir: v3(la, lo, 1), r: 0.02 });
       placed++;
     }
 
